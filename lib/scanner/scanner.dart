@@ -60,6 +60,8 @@ class Scanner {
           while (peek() != "\n" && peek() != null && !isAtEnd()) {
             advance();
           }
+        } else if (match("*")) {
+          nestedComment();
         } else {
           addTokenNoLiteral(TokenType.SLASH);
         }
@@ -100,6 +102,23 @@ class Scanner {
           DLox.error(line, "Unexpected character.");
         }
         break;
+    }
+  }
+
+  void nestedComment() {
+    int counter = 1;
+    while (peek() != null && !isAtEnd()) {
+      if (peek() == "*" && peekNext() == "/") {
+        counter--;
+        current += 2;
+        if (counter == 0) {
+          break;
+        }
+      } else if (peek() == "/" && peekNext() == "*") {
+        counter++;
+      }
+
+      advance();
     }
   }
 
