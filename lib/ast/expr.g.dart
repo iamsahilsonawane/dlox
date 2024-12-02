@@ -18,7 +18,6 @@ class Binary extends Expr {
     required this.right,
   });
 
-
   @override
   R accept<R>(Visitor<R> visitor) {
     return visitor.visitBinaryExpr(this);
@@ -34,7 +33,6 @@ class Grouping extends Expr {
     required this.expression,
   });
 
-
   @override
   R accept<R>(Visitor<R> visitor) {
     return visitor.visitGroupingExpr(this);
@@ -47,7 +45,6 @@ class Literal extends Expr {
   Literal({
     required this.value,
   });
-
 
   @override
   R accept<R>(Visitor<R> visitor) {
@@ -63,7 +60,6 @@ class Unary extends Expr {
     required this.right,
   });
 
-
   @override
   R accept<R>(Visitor<R> visitor) {
     return visitor.visitUnaryExpr(this);
@@ -72,4 +68,3 @@ class Unary extends Expr {
   final Token operator;
   final Expr right;
 }
-
