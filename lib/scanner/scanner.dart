@@ -75,6 +75,9 @@ class Scanner {
       case '<':
         addTokenNoLiteral(match('=') ? TokenType.LESS_EQUAL : TokenType.LESS);
         break;
+      case '?':
+        addTokenNoLiteral(TokenType.QUESTION);
+        break;
       case '>':
         addTokenNoLiteral(
             match('=') ? TokenType.GREATER_EQUAL : TokenType.GREATER);

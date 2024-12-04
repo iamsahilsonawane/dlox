@@ -13,7 +13,8 @@ void main(List<String> args) {
     "Binary   : Expr left, Token operator, Expr right",
     "Grouping : Expr expression",
     "Literal  : Object? value",
-    "Unary    : Token operator, Expr right"
+    "Unary    : Token operator, Expr right",
+    "Conditional     : Expr expr, Expr thenBranch, Expr elseBranch"
   ]);
 }
 
@@ -68,7 +69,6 @@ void defineType(
   buffer.writeln();
 
   // Visitor pattern.
-  buffer.writeln();
   buffer.writeln("  @override");
   buffer.writeln("  R accept<R>(Visitor<R> visitor) {");
   buffer.writeln("    return visitor.visit$className$baseName(this);");

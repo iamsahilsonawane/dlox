@@ -22,12 +22,26 @@ class Parser {
   }
 
   //TODO: this can be an issue for function arguments, right now there's no implementation for function argument. Keeping for later
+  //https://github.com/munificent/craftinginterpreters/blob/master/note/answers/chapter06_parsing.md
   Expr comma() {
-    Expr expr = equality();
+    Expr expr = conditional();
     while (match([TokenType.COMMA])) {
       Token operator = previous();
       Expr right = comparison();
       expr = Binary(left: expr, operator: operator, right: right);
+    }
+    return expr;
+  }
+
+  Expr conditional() {
+    Expr expr = comparison();
+    if (match([TokenType.QUESTION])) {
+      Expr thenBranch = expression();
+      consume(TokenType.COLON,
+          "Expect : after then brach of conditional expression.");
+      Expr elseBranch = conditional();
+      return Conditional(
+          expr: expr, thenBranch: thenBranch, elseBranch: elseBranch);
     }
     return expr;
   }
