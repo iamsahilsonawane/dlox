@@ -132,6 +132,32 @@ class Parser {
       return Grouping(expression: expr);
     }
 
+    // Error productions.
+    if (match([TokenType.BANG_EQUAL, TokenType.EQUAL_EQUAL])) {
+      error(previous(), "Missing left-hand operand.");
+      return equality();
+    }
+
+    if (match([
+      TokenType.GREATER,
+      TokenType.GREATER_EQUAL,
+      TokenType.LESS,
+      TokenType.LESS_EQUAL
+    ])) {
+      error(previous(), "Missing left-hand operand.");
+      return comparison();
+    }
+
+    if (match([TokenType.PLUS])) {
+      error(previous(), "Missing left-hand operand.");
+      return term();
+    }
+
+    if (match([TokenType.SLASH, TokenType.STAR])) {
+      error(previous(), "Missing left-hand operand.");
+      return factor();
+    }
+
     throw error(peek(), "Expect expression.");
   }
 

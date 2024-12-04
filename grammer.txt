@@ -12,4 +12,9 @@ unary            → ( "!" | "-" | "--" | "++" ) unary
                  | postfix ;
 postfix          → primary ( "--" | ++" )* ;
 primary          → NUMBER | STRING | "true" | "false" | "nil"
-                 | "(" expression ")" ;
+                 | "(" expression ")"
+                 //error
+                 | ( "!=" | "==" ) equality
+                 | ( ">" | ">=" | "<" | "<=" ) comparison
+                 | ( "+" ) term
+                 | ( "/" | "*" ) factor ;
