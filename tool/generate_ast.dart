@@ -12,6 +12,7 @@ void main(List<String> args) {
   defineAst(outputDir, "Expr", [
     "Binary   : Expr left, Token operator, Expr right",
     "Grouping : Expr expression",
+    //A note on dart impl: Object is a union type of all other types except i.e. null (`Null` type) is not a subtype of Object, thus the nullable notation (?)
     "Literal  : Object? value",
     "Unary    : Token operator, Expr right",
     "Conditional     : Expr expr, Expr thenBranch, Expr elseBranch"

@@ -3,6 +3,8 @@ import 'dart:io';
 
 import 'package:dlox/ast/ast_printer.dart';
 import 'package:dlox/ast/expr.g.dart';
+import 'package:dlox/interpreter/errors/runtime_error.dart';
+import 'package:dlox/interpreter/interpreter.dart';
 import 'package:dlox/parser/parser.dart';
 import 'package:dlox/scanner/scanner.dart';
 import 'package:dlox/scanner/token.dart';
@@ -12,11 +14,15 @@ export 'package:dlox/scanner/token.dart';
 
 class DLox {
   static bool hadError = false;
+  static bool hadRuntimeError = false;
+
+  static final interpreter = Interpreter();
 
   Future<void> runFile(String path) async {
     final source = await File(path).readAsString(encoding: utf8);
     await run(source);
     if (hadError) exitCode = 65;
+    if (hadRuntimeError) exitCode = 70;
   }
 
   Future<void> runPrompt() async {
@@ -39,11 +45,17 @@ class DLox {
     // Stop if there was a syntax error.
     if (hadError) return;
 
-    print(AstPrinter().print(expression!));
+    // print(AstPrinter().print(expression!));
+    interpreter.interpret(expression!);
   }
 
   static void error(int line, String message) {
     report(line, "", message);
+  }
+
+  static void runtimeError(RuntimeError error) {
+    print("${error.message}\n[line ${error.token.line}]");
+    hadRuntimeError = true;
   }
 
   static report(int line, String where, String message) {
