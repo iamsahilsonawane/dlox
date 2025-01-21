@@ -38,8 +38,8 @@ class Parser {
     if (match([TokenType.QUESTION])) {
       Expr thenBranch = expression();
       consume(TokenType.COLON,
-          "Expect : after then brach of conditional expression.");
-      Expr elseBranch = conditional();
+          "Expect : after then branch of conditional expression.");
+      Expr elseBranch = expression();
       return Conditional(
           expr: expr, thenBranch: thenBranch, elseBranch: elseBranch);
     }

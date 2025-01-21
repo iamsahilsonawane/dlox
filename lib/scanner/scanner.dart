@@ -52,6 +52,9 @@ class Scanner {
       case ';':
         addTokenNoLiteral(TokenType.SEMICOLON);
         break;
+      case ':':
+        addTokenNoLiteral(TokenType.COLON);
+        break;
       case '*':
         addTokenNoLiteral(TokenType.STAR);
         break;
