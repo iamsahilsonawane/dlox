@@ -54,6 +54,10 @@ class Interpreter extends Visitor<Object?> {
         if (left is String && right is String) {
           return left + right;
         }
+        if ((left is String && right is double) ||
+            (left is double && right is String)) {
+          return "${_stringify(left)}${_stringify(right)}";
+        }
         throw RuntimeError(
             expr.operator, "Operands must be two numbers or two strings.");
       case TokenType.MINUS:
