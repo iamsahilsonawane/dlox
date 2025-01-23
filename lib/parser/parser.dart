@@ -3,18 +3,65 @@ import 'package:dlox/dlox.dart';
 import 'package:dlox/parser/parse_error.dart';
 import 'package:dlox/scanner/token_type.dart';
 
+import '../ast/stmt.g.dart';
+
 class Parser {
   final List<Token> tokens;
   int current = 0;
 
   Parser({required this.tokens});
 
-  Expr? parse() {
+  List<Stmt> parse() {
+    final statements = <Stmt>[];
+    while (!isAtEnd()) {
+      final stmt = declaration();
+      if (stmt != null) {
+        statements.add(stmt);
+      }
+    }
+    return statements;
+  }
+
+  Stmt? declaration() {
     try {
-      return expression();
-    } on ParseError catch (_) {
+      if (match([TokenType.VAR])) {
+        return variableDeclaration();
+      }
+      return statement();
+    } catch (e) {
+      synchronize();
       return null;
     }
+  }
+
+  Stmt variableDeclaration() {
+    final name = consume(TokenType.IDENTIFIER, "Expected an identifier");
+    Expr? expr;
+    if (match([TokenType.EQUAL])) {
+      expr = expression();
+    }
+    consume(TokenType.SEMICOLON, "Expected a ; after a variable declaration");
+    return Var(name: name, initializer: expr);
+  }
+
+  Stmt statement() {
+    if (match([TokenType.PRINT])) {
+      return printStatement();
+    }
+
+    return expressionStatement();
+  }
+
+  Stmt printStatement() {
+    Expr expr = expression();
+    consume(TokenType.SEMICOLON, "Expect ';' after value");
+    return Print(expression: expr);
+  }
+
+  Stmt expressionStatement() {
+    Expr expr = expression();
+    consume(TokenType.SEMICOLON, "Expect ';' after the expression");
+    return Expression(expression: expr);
   }
 
   Expr expression() {
@@ -130,6 +177,10 @@ class Parser {
 
       consume(TokenType.RIGHT_PAREN, "Expect ')' after expression.");
       return Grouping(expression: expr);
+    }
+
+    if (match([TokenType.IDENTIFIER])) {
+      return Variable(name: previous());
     }
 
     // Error productions.

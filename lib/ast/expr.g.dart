@@ -4,12 +4,13 @@ abstract class Expr {
   R accept<R>(Visitor<R> visitor);
 }
 
-abstract class Visitor<R> {
+mixin Visitor<R> {
   R visitBinaryExpr(Binary expr);
   R visitGroupingExpr(Grouping expr);
   R visitLiteralExpr(Literal expr);
   R visitUnaryExpr(Unary expr);
   R visitConditionalExpr(Conditional expr);
+  R visitVariableExpr(Variable expr);
 }
 
 class Binary extends Expr {
@@ -85,5 +86,18 @@ class Conditional extends Expr {
   final Expr expr;
   final Expr thenBranch;
   final Expr elseBranch;
+}
+
+class Variable extends Expr {
+  Variable({
+    required this.name,
+  });
+
+  @override
+  R accept<R>(Visitor<R> visitor) {
+    return visitor.visitVariableExpr(this);
+  }
+
+  final Token name;
 }
 

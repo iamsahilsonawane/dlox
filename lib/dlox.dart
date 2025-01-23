@@ -10,7 +10,10 @@ import 'package:dlox/scanner/scanner.dart';
 import 'package:dlox/scanner/token.dart';
 import 'package:dlox/scanner/token_type.dart';
 
+import 'ast/stmt.g.dart';
+
 export 'package:dlox/scanner/token.dart';
+export 'package:dlox/ast/expr.g.dart';
 
 class DLox {
   static bool hadError = false;
@@ -40,13 +43,13 @@ class DLox {
     List<Token> tokens = scanner.scanTokens();
 
     Parser parser = Parser(tokens: tokens);
-    Expr? expression = parser.parse();
+    List<Stmt> statements = parser.parse();
 
     // Stop if there was a syntax error.
     if (hadError) return;
 
     // print(AstPrinter().print(expression!));
-    interpreter.interpret(expression!);
+    interpreter.interpret(statements);
   }
 
   static void error(int line, String message) {
@@ -65,9 +68,9 @@ class DLox {
 
   static void errorAt(Token token, String message) {
     if (token.type == TokenType.EOF) {
-      report(token.line, " at end", message);
+      report(token.line, "at end", message);
     } else {
-      report(token.line, " at '${token.lexeme}'", message);
+      report(token.line, "at '${token.lexeme}'", message);
     }
   }
 }

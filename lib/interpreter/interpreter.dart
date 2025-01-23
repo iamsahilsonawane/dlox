@@ -1,14 +1,19 @@
-import 'package:dlox/ast/expr.g.dart';
+import 'package:dlox/ast/expr.g.dart' as pkg_expr;
+import 'package:dlox/ast/stmt.g.dart' as pkg_stmt;
 import 'package:dlox/dlox.dart';
+import 'package:dlox/environment.dart';
 import 'package:dlox/interpreter/errors/runtime_error.dart';
 import 'package:dlox/scanner/token_type.dart';
 
 // Post-order traversal of expressions (syntax tree) to evalute value
-class Interpreter extends Visitor<Object?> {
-  void interpret(Expr expression) {
+class Interpreter with pkg_expr.Visitor<Object?>, pkg_stmt.Visitor<void> {
+  final _environment = Environment();
+
+  void interpret(List<pkg_stmt.Stmt> statements) {
     try {
-      Object? value = _evaluate(expression);
-      print(_stringify(value));
+      for (final statement in statements) {
+        _execute(statement);
+      }
     } on RuntimeError catch (e) {
       DLox.runtimeError(e);
     }
@@ -27,6 +32,10 @@ class Interpreter extends Visitor<Object?> {
     return object.toString();
   }
 
+  void _execute(pkg_stmt.Stmt statement) {
+    statement.accept(this);
+  }
+
   Object? _evaluate(Expr expr) {
     return expr.accept(this);
   }
@@ -39,6 +48,31 @@ class Interpreter extends Visitor<Object?> {
 
   bool _isEqual(Object? a, Object? b) {
     return a == b;
+  }
+
+  @override
+  void visitExpressionStmt(pkg_stmt.Expression stmt) {
+    _evaluate(stmt.expression);
+  }
+
+  @override
+  void visitPrintStmt(pkg_stmt.Print stmt) {
+    final result = _evaluate(stmt.expression);
+    print(_stringify(result));
+  }
+
+  @override
+  void visitVarStmt(pkg_stmt.Var stmt) {
+    Object? value;
+    if (stmt.initializer != null) {
+      value = stmt.initializer!.accept(this);
+    }
+    _environment.define(stmt.name.lexeme, value);
+  }
+
+  @override
+  Object? visitVariableExpr(pkg_expr.Variable expr) {
+    return _environment.get(expr.name);
   }
 
   @override
@@ -68,6 +102,9 @@ class Interpreter extends Visitor<Object?> {
         return (left as num) * (right as num);
       case TokenType.SLASH:
         _checkNumberOperands(expr.operator, left, right);
+        if (right == 0) {
+          throw RuntimeError(expr.operator, "Division by zero is not allowed");
+        }
         return (left as num) / (right as num);
       case TokenType.GREATER:
         _checkNumberOperands(expr.operator, left, right);
@@ -94,8 +131,11 @@ class Interpreter extends Visitor<Object?> {
 
   @override
   Object? visitConditionalExpr(Conditional expr) {
-    // TODO: implement visitConditionalExpr
-    throw UnimplementedError();
+    if (expr.expr.accept(this) as bool) {
+      return expr.thenBranch.accept(this);
+    } else {
+      return expr.elseBranch.accept(this);
+    }
   }
 
   @override

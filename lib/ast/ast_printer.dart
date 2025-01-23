@@ -1,6 +1,7 @@
 import 'package:dlox/ast/expr.g.dart';
+import 'package:dlox/ast/stmt.g.dart' as pkg_stmt;
 
-class AstPrinter implements Visitor<String> {
+class AstPrinter with Visitor<String> {
   String print(Expr expr) {
     return expr.accept(this);
   }
@@ -49,5 +50,10 @@ class AstPrinter implements Visitor<String> {
     builder.write(")");
 
     return builder.toString();
+  }
+
+  @override
+  String visitVariableExpr(Variable expr) {
+    throw UnimplementedError();
   }
 }

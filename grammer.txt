@@ -1,6 +1,13 @@
 # Grammer for dlox
 
 ### Syntax Grammer
+program          → declaration* EOF ;
+declaration      → varDecl | statement;
+varDecl          → "var" IDENTIFIER ("=" expression ";")? ;
+statement        → exprStmt | printStmt ;
+exprStmt         → expression ";" ;
+printStmt        → "print" expression ";" ;
+
 expression       → comma ;
 comma            → conditional ( "," equality )* ;
 conditional      → comparison ( "?" expression ":" expression)* ;
@@ -12,6 +19,7 @@ unary            → ( "!" | "-" | "--" | "++" ) unary
                  | postfix ;
 postfix          → primary ( "--" | ++" )* ;
 primary          → NUMBER | STRING | "true" | "false" | "nil" | "(" expression ")"
+                 | IDENTIFIER
                  //error productions 
                  | ( "!=" | "==" ) equality
                  | ( ">" | ">=" | "<" | "<=" ) comparison

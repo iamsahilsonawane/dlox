@@ -1,7 +1,5 @@
 import 'dart:io';
 
-import 'package:dlox/dlox.dart';
-
 void main(List<String> args) {
   if (args.length != 1) {
     print("Usage: dart run tool/generate_ast <output directory>");
@@ -10,12 +8,19 @@ void main(List<String> args) {
   String outputDir = args[0];
 
   defineAst(outputDir, "Expr", [
-    "Binary   : Expr left, Token operator, Expr right",
-    "Grouping : Expr expression",
+    "Binary          : Expr left, Token operator, Expr right",
+    "Grouping        : Expr expression",
     //A note on dart impl: Object is a union type of all other types except i.e. null (`Null` type) is not a subtype of Object, thus the nullable notation (?)
-    "Literal  : Object? value",
-    "Unary    : Token operator, Expr right",
-    "Conditional     : Expr expr, Expr thenBranch, Expr elseBranch"
+    "Literal         : Object? value",
+    "Unary           : Token operator, Expr right",
+    "Conditional     : Expr expr, Expr thenBranch, Expr elseBranch",
+    "Variable        : Token name",
+  ]);
+
+  defineAst(outputDir, "Stmt", [
+    "Expression      : Expr expression",
+    "Print           : Expr expression",
+    "Var             : Token name, Expr? initializer",
   ]);
 }
 
@@ -43,7 +48,7 @@ void defineAst(String outputDir, String baseName, List<String> types) {
 }
 
 void defineVisitor(StringBuffer buffer, String baseName, List<String> types) {
-  buffer.writeln("abstract class Visitor<R> {");
+  buffer.writeln("mixin Visitor<R> {");
 
   for (String type in types) {
     String typeName = type.split(":")[0].trim();
