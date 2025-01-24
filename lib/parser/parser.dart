@@ -65,18 +65,24 @@ class Parser {
   }
 
   Expr expression() {
-    return comma();
+    return assignment();
   }
 
-  //TODO: this can be an issue for function arguments, right now there's no implementation for function argument. Keeping for later
-  //https://github.com/munificent/craftinginterpreters/blob/master/note/answers/chapter06_parsing.md
-  Expr comma() {
+  Expr assignment() {
     Expr expr = conditional();
-    while (match([TokenType.COMMA])) {
-      Token operator = previous();
-      Expr right = comparison();
-      expr = Binary(left: expr, operator: operator, right: right);
+
+    if (match([TokenType.EQUAL])) {
+      final equals = previous();
+      final value = assignment();
+
+      if (expr is Variable) {
+        Token name = expr.name;
+        return Assign(name: name, value: value);
+      }
+
+      error(equals, "Invalid assignment target"); 
     }
+
     return expr;
   }
 

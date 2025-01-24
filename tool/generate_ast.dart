@@ -7,7 +7,8 @@ void main(List<String> args) {
 
   String outputDir = args[0];
 
-  defineAst(outputDir, "Expr", [
+ defineAst(outputDir, "Expr", [
+    "Assign          : Token name, Expr value",
     "Binary          : Expr left, Token operator, Expr right",
     "Grouping        : Expr expression",
     //A note on dart impl: Object is a union type of all other types except i.e. null (`Null` type) is not a subtype of Object, thus the nullable notation (?)

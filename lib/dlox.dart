@@ -57,7 +57,7 @@ class DLox {
   }
 
   static void runtimeError(RuntimeError error) {
-    print("${error.message}\n[line ${error.token.line}]");
+    print("[line ${error.token.line}] ${error.message}");
     hadRuntimeError = true;
   }
 

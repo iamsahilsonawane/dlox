@@ -49,6 +49,13 @@ class Interpreter with pkg_expr.Visitor<Object?>, pkg_stmt.Visitor<void> {
   bool _isEqual(Object? a, Object? b) {
     return a == b;
   }
+  
+  @override
+  Object? visitAssignExpr(pkg_expr.Assign expr) {
+    Object? value = expr.value.accept(this);
+    _environment.assign(expr.name, value);
+    return value;
+  }
 
   @override
   void visitExpressionStmt(pkg_stmt.Expression stmt) {
