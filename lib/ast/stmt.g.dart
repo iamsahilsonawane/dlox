@@ -9,6 +9,7 @@ mixin Visitor<R> {
   R visitIfStmt(If stmt);
   R visitExpressionStmt(Expression stmt);
   R visitPrintStmt(Print stmt);
+  R visitWhileStmt(While stmt);
   R visitVarStmt(Var stmt);
 }
 
@@ -66,6 +67,21 @@ class Print extends Stmt {
   }
 
   final Expr expression;
+}
+
+class While extends Stmt {
+  While({
+    required this.condition,
+    required this.body,
+  });
+
+  @override
+  R accept<R>(Visitor<R> visitor) {
+    return visitor.visitWhileStmt(this);
+  }
+
+  final Expr condition;
+  final Stmt body;
 }
 
 class Var extends Stmt {

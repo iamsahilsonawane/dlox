@@ -51,6 +51,13 @@ class Interpreter with pkg_expr.Visitor<Object?>, pkg_stmt.Visitor<void> {
   }
 
   @override
+  void visitWhileStmt(pkg_stmt.While stmt) {
+    while(_isTruthy(_evaluate(stmt.condition))) {
+      _execute(stmt.body);
+    }
+  }
+
+  @override
   Object? visitLogicalExpr(pkg_expr.Logical expr) {
     Object? left = _evaluate(expr.left);
 

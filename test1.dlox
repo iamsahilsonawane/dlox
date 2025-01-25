@@ -69,3 +69,11 @@ if (lOCheckA and lOCheckB) {
 } else {
   print "else";
 }
+
+// -- loops (while & for)
+
+var whileCounter = 5;
+while (whileCounter > 0) {
+  print "Counter: " + whileCounter;
+  whileCounter = whileCounter - 1;
+}

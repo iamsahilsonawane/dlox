@@ -24,6 +24,7 @@ void main(List<String> args) {
     "If              : Expr conditional, Stmt thenBranch, Stmt? elseBranch",
     "Expression      : Expr expression",
     "Print           : Expr expression",
+    "While           : Expr condition, Stmt body",
     "Var             : Token name, Expr? initializer",
   ]);
 }

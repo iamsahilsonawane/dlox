@@ -50,30 +50,46 @@ class Parser {
     }
 
     if (match([TokenType.LEFT_BRACE])) {
-      return Block(statements: block());
+      return blockStatement();
     }
 
     if (match([TokenType.IF])) {
-      consume(TokenType.LEFT_PAREN, "Expected '(' for condition after if.");
-      Expr expr = expression();
-      Stmt thenBranch;
-      Stmt? elseBranch;
-      consume(TokenType.RIGHT_PAREN, "Expected ')' after ending condition.");
-      thenBranch = statement();
-      if (match([TokenType.ELSE])) {
-        elseBranch = statement();
-      }
-      return If(
-        conditional: expr,
-        thenBranch: thenBranch,
-        elseBranch: elseBranch,
-      );
+      return ifStatement();
+    }
+
+    if (match([TokenType.WHILE])) {
+      return whileStatement();
     }
 
     return expressionStatement();
   }
 
-  List<Stmt> block() {
+  Stmt whileStatement() {
+    consume(TokenType.LEFT_PAREN, "Expected '(' for 'while' condition");
+    Expr expr = expression();
+    consume(TokenType.RIGHT_PAREN, "Expected ')' after ending condition.");
+    Stmt stmt = statement();
+    return While(condition: expr, body: stmt);
+  }
+
+  Stmt ifStatement() {
+    consume(TokenType.LEFT_PAREN, "Expected '(' for condition after if.");
+    Expr expr = expression();
+    Stmt thenBranch;
+    Stmt? elseBranch;
+    consume(TokenType.RIGHT_PAREN, "Expected ')' after ending condition.");
+    thenBranch = statement();
+    if (match([TokenType.ELSE])) {
+      elseBranch = statement();
+    }
+    return If(
+      conditional: expr,
+      thenBranch: thenBranch,
+      elseBranch: elseBranch,
+    );
+  }
+
+  Stmt blockStatement() {
     final List<Stmt> statements = [];
     while (!check(TokenType.RIGHT_BRACE) && !isAtEnd()) {
       final stmt = declaration();
@@ -82,7 +98,7 @@ class Parser {
       }
     }
     consume(TokenType.RIGHT_BRACE, "Expected '}' after a block");
-    return statements;
+    return Block(statements: statements);
   }
 
   Stmt printStatement() {
