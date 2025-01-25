@@ -49,7 +49,23 @@ class Parser {
       return printStatement();
     }
 
+    if (match([TokenType.LEFT_BRACE])) {
+      return Block(statements: block());
+    }
+
     return expressionStatement();
+  }
+
+  List<Stmt> block() {
+    final List<Stmt> statements = [];
+    while (!check(TokenType.RIGHT_BRACE) && !isAtEnd()) {
+      final stmt = declaration();
+      if (stmt != null) {
+        statements.add(stmt);
+      }
+    }
+    consume(TokenType.RIGHT_BRACE, "Expected '}' after a block");
+    return statements;
   }
 
   Stmt printStatement() {
@@ -80,7 +96,7 @@ class Parser {
         return Assign(name: name, value: value);
       }
 
-      error(equals, "Invalid assignment target"); 
+      error(equals, "Invalid assignment target");
     }
 
     return expr;

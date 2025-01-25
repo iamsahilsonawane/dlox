@@ -7,7 +7,7 @@ import 'package:dlox/scanner/token_type.dart';
 
 // Post-order traversal of expressions (syntax tree) to evalute value
 class Interpreter with pkg_expr.Visitor<Object?>, pkg_stmt.Visitor<void> {
-  final _environment = Environment();
+  Environment _environment = Environment.root();
 
   void interpret(List<pkg_stmt.Stmt> statements) {
     try {
@@ -49,7 +49,26 @@ class Interpreter with pkg_expr.Visitor<Object?>, pkg_stmt.Visitor<void> {
   bool _isEqual(Object? a, Object? b) {
     return a == b;
   }
-  
+
+  @override
+  Object? visitBlockStmt(pkg_stmt.Block stmt) {
+    executeBlock(stmt.statements, Environment(_environment));
+    return null;
+  }
+
+  void executeBlock(List<pkg_stmt.Stmt> statements, Environment environment) {
+    final previous = _environment;
+
+    try {
+      _environment = environment;
+      for (final statement in statements) {
+        _execute(statement);
+      }
+    } finally {
+      _environment = previous;
+    }
+  }
+
   @override
   Object? visitAssignExpr(pkg_expr.Assign expr) {
     Object? value = expr.value.accept(this);

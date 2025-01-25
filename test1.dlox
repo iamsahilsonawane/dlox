@@ -16,3 +16,25 @@ print "value of b: " + b;
 print "value of c: " + c;
 print "value of d: " + d;
 print "what's a + b: " + (a + b);
+
+// --- lexical scope
+var a = "global a";
+var b = "global b";
+var c = "global c";
+{
+  var b = "outer b";
+  var a = "outer a";
+  {
+    var a = "inner a";
+    print a;
+    print b;
+    print c;
+  }
+  print a;
+  print b;
+  print c;
+}
+print a;
+print b;
+print c;
+

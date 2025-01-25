@@ -5,9 +5,23 @@ abstract class Stmt {
 }
 
 mixin Visitor<R> {
+  R visitBlockStmt(Block stmt);
   R visitExpressionStmt(Expression stmt);
   R visitPrintStmt(Print stmt);
   R visitVarStmt(Var stmt);
+}
+
+class Block extends Stmt {
+  Block({
+    required this.statements,
+  });
+
+  @override
+  R accept<R>(Visitor<R> visitor) {
+    return visitor.visitBlockStmt(this);
+  }
+
+  final List<Stmt> statements;
 }
 
 class Expression extends Stmt {
