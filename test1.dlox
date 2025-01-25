@@ -77,3 +77,7 @@ while (whileCounter > 0) {
   print "Counter: " + whileCounter;
   whileCounter = whileCounter - 1;
 }
+
+for (var a = 0; a < 10; a = a+1) {
+  print "for a: " + a;
+}

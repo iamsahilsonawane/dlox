@@ -5,9 +5,12 @@ program          → declaration* EOF ;
 declaration      → varDecl | statement;
 varDecl          → "var" IDENTIFIER ("=" expression ";")? ;
 statement        → exprStmt | printStmt | ifExpr
-                   | whileStmt | block;
+                   | whileStmt | forStmt | block;
 ifExpr           → "if" "(" expression ")" statement
                    ( "else" statement )? ;
+forStmt          → "for" "(" (varDecl | exprStmt | ";") 
+                  expression? ";"
+                  expression? ")" statement ;
 whileStmt        → "while" "(" expression ")" statement ;
 block            → "{" declaration* "}" ;
 exprStmt         → expression ";" ;

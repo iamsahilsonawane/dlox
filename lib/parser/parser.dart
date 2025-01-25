@@ -61,7 +61,47 @@ class Parser {
       return whileStatement();
     }
 
+    if (match([TokenType.FOR])) {
+      return forStatement();
+    }
+
     return expressionStatement();
+  }
+
+  Stmt forStatement() {
+    //desugar to while semantics
+    consume(TokenType.LEFT_PAREN, "Expected '(' after 'for'");
+
+    Stmt? initializer;
+    if (match([TokenType.VAR])) {
+      initializer = variableDeclaration();
+    } else if (match([TokenType.SEMICOLON])) {
+    } else {
+      initializer = expressionStatement();
+    }
+    Expr condition = Literal(value: true);
+    if (!check(TokenType.SEMICOLON)) {
+      condition = expression();
+    }
+    consume(TokenType.SEMICOLON, "Expected ';' after condition");
+    Expr? increment;
+    if (!check(TokenType.SEMICOLON)) {
+      increment = expression();
+    }
+    consume(TokenType.RIGHT_PAREN, "Expected ')' after ending condition.");
+
+    Stmt body = statement();
+    if (increment != null) {
+      body = Block(statements: [body, Expression(expression: increment)]);
+    }
+
+    body = While(body: body, condition: condition);
+
+    if (initializer != null) {
+      body = Block(statements: [initializer, body]);
+    }
+
+    return body;
   }
 
   Stmt whileStatement() {
