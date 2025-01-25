@@ -19,6 +19,8 @@ class DLox {
   static bool hadError = false;
   static bool hadRuntimeError = false;
 
+  static bool isREPL = false;
+
   static final interpreter = Interpreter();
 
   Future<void> runFile(String path) async {
@@ -29,6 +31,7 @@ class DLox {
   }
 
   Future<void> runPrompt() async {
+    isREPL = true;
     Stream codeListener =
         stdin.transform(Utf8Decoder()).transform(LineSplitter());
 

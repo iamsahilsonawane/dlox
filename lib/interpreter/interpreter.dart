@@ -78,7 +78,10 @@ class Interpreter with pkg_expr.Visitor<Object?>, pkg_stmt.Visitor<void> {
 
   @override
   void visitExpressionStmt(pkg_stmt.Expression stmt) {
-    _evaluate(stmt.expression);
+    final result = _evaluate(stmt.expression);
+    if (DLox.isREPL) {
+      print(_stringify(result));
+    }
   }
 
   @override
