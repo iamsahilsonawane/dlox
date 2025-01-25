@@ -1,6 +1,8 @@
 import 'dlox.dart';
 import 'package:dlox/interpreter/errors/runtime_error.dart';
 
+class UninitialisedVar {}
+
 class Environment { 
   final Environment? enclosing;
 
@@ -11,6 +13,9 @@ class Environment {
 
   Object? get(Token token) {
     if (_values.containsKey(token.lexeme)) {
+      if (_values[token.lexeme] is UninitialisedVar) {
+        throw RuntimeError(token, "Tried to access uninitialised variable '${token.lexeme}'.");
+      }
       return _values[token.lexeme];
     }
 
@@ -18,7 +23,7 @@ class Environment {
       return enclosing!.get(token);
     }
 
-    throw RuntimeError(token, "Undefined variable '${token.lexeme}'");
+    throw RuntimeError(token, "Undefined variable '${token.lexeme}'.");
   }
 
   void define(String name, Object? value) {
@@ -35,6 +40,6 @@ class Environment {
       return enclosing!.assign(name, value);
     }
 
-    throw RuntimeError(name, "Undefined variable '${name.lexeme}'");
+    throw RuntimeError(name, "Undefined variable '${name.lexeme}'.");
   }
 }

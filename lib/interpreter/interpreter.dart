@@ -92,9 +92,10 @@ class Interpreter with pkg_expr.Visitor<Object?>, pkg_stmt.Visitor<void> {
 
   @override
   void visitVarStmt(pkg_stmt.Var stmt) {
-    Object? value;
+    Object? value = UninitialisedVar();
     if (stmt.initializer != null) {
-      value = stmt.initializer!.accept(this);
+      final result = stmt.initializer!.accept(this);
+      value = result;
     }
     _environment.define(stmt.name.lexeme, value);
   }

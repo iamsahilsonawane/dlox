@@ -32,12 +32,14 @@ class DLox {
 
   Future<void> runPrompt() async {
     isREPL = true;
+    stdout.write("> ");
     Stream codeListener =
         stdin.transform(Utf8Decoder()).transform(LineSplitter());
 
     await for (final code in codeListener) {
       await run(code);
       hadError = false;
+      stdout.write("> ");
     }
   }
 

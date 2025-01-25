@@ -38,3 +38,8 @@ print a;
 print b;
 print c;
 
+// -- uninitialised vars
+var deltaA = nil
+print deltaA; //works fine
+var deltaB
+print deltaB; //throws
