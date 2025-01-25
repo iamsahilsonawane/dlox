@@ -4,22 +4,26 @@
 program          → declaration* EOF ;
 declaration      → varDecl | statement;
 varDecl          → "var" IDENTIFIER ("=" expression ";")? ;
-statement        → exprStmt | printStmt |  block;
-bloc             → "{" declaration* "}";
+statement        → exprStmt | printStmt | ifExpr |  block ;
+ifExpr           → "if" "(" expression ")" statement
+                   ( "else" statement )? ;
+block            → "{" declaration* "}" ;
 exprStmt         → expression ";" ;
 printStmt        → "print" expression ";" ;
 
-expression       → comma ;
-comma            → conditional ( "," equality )* ;
-conditional      → comparison ( "?" expression ":" expression)* ;
+expression       → assignment ;
+assignment       → IDENTIFIER "=" assignment | conditional ;
+conditional      → logic_or ( "?" expression ":" expression)* ;
+logic_or         → logic_and ( "or" logic_and )* ;
+logic_and        → equality ( "and" equality )*;
 equality         → comparison ( ( "!=" | "==" ) comparison )* ;
 comparison       → term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
 term             → factor ( ( "-" | "+" ) factor )* ;
 factor           → unary ( ( "/" | "*" ) unary )* ;
 unary            → ( "!" | "-" | "--" | "++" ) unary
                  | postfix ;
-postfix          → primary ( "--" | ++" )* ;
-primary          → NUMBER | STRING | "true" | "false" | "nil" | "(" expression ")"
+postfix          → primary ( "--" | "++" )* ;
+primary          → NUMBER | STRING | "true" | "false" | "nil" | "(" expression ")" 
                  | IDENTIFIER
                  //error productions 
                  | ( "!=" | "==" ) equality

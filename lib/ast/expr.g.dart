@@ -7,6 +7,7 @@ abstract class Expr {
 mixin Visitor<R> {
   R visitAssignExpr(Assign expr);
   R visitBinaryExpr(Binary expr);
+  R visitLogicalExpr(Logical expr);
   R visitGroupingExpr(Grouping expr);
   R visitLiteralExpr(Literal expr);
   R visitUnaryExpr(Unary expr);
@@ -39,6 +40,23 @@ class Binary extends Expr {
   @override
   R accept<R>(Visitor<R> visitor) {
     return visitor.visitBinaryExpr(this);
+  }
+
+  final Expr left;
+  final Token operator;
+  final Expr right;
+}
+
+class Logical extends Expr {
+  Logical({
+    required this.left,
+    required this.operator,
+    required this.right,
+  });
+
+  @override
+  R accept<R>(Visitor<R> visitor) {
+    return visitor.visitLogicalExpr(this);
   }
 
   final Expr left;

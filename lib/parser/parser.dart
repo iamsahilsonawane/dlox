@@ -53,6 +53,23 @@ class Parser {
       return Block(statements: block());
     }
 
+    if (match([TokenType.IF])) {
+      consume(TokenType.LEFT_PAREN, "Expected '(' for condition after if.");
+      Expr expr = expression();
+      Stmt thenBranch;
+      Stmt? elseBranch;
+      consume(TokenType.RIGHT_PAREN, "Expected ')' after ending condition.");
+      thenBranch = statement();
+      if (match([TokenType.ELSE])) {
+        elseBranch = statement();
+      }
+      return If(
+        conditional: expr,
+        thenBranch: thenBranch,
+        elseBranch: elseBranch,
+      );
+    }
+
     return expressionStatement();
   }
 
@@ -103,7 +120,7 @@ class Parser {
   }
 
   Expr conditional() {
-    Expr expr = comparison();
+    Expr expr = logicOr();
     if (match([TokenType.QUESTION])) {
       Expr thenBranch = expression();
       consume(TokenType.COLON,
@@ -111,6 +128,26 @@ class Parser {
       Expr elseBranch = expression();
       return Conditional(
           expr: expr, thenBranch: thenBranch, elseBranch: elseBranch);
+    }
+    return expr;
+  }
+
+  Expr logicOr() {
+    final expr = logicAnd();
+    if (match([TokenType.OR])) {
+      final op = previous();
+      final right = logicAnd();
+      return Logical(left: expr, operator: op, right: right);
+    }
+    return expr;
+  }
+
+  Expr logicAnd() {
+    final expr = equality();
+    if (match([TokenType.AND])) {
+      final op = previous();
+      final right = equality();
+      return Logical(left: expr, operator: op, right: right);
     }
     return expr;
   }

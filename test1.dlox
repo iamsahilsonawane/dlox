@@ -38,8 +38,34 @@ print a;
 print b;
 print c;
 
+var scA = 1;
+{
+  var scA = scA + 1;
+  print scA;
+}
+
 // -- uninitialised vars
-var deltaA = nil
-print deltaA; //works fine
-var deltaB
-print deltaB; //throws
+//var deltaA = nil;
+//print deltaA; //works fine
+//var deltaB;
+//print deltaB; //throws
+
+if (0 > 1) {
+  print "then";
+} else {
+  print "else";
+}
+
+if (nil) {
+  print "incorrect";
+} 
+
+// --- logic operators 
+var lOCheckA = "hi" or 2; // "hi".
+var lOCheckB = nil or "yes"; // "yes".
+
+if (lOCheckA and lOCheckB) {
+  print "then";
+} else {
+  print "else";
+}

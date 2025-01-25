@@ -6,6 +6,7 @@ abstract class Stmt {
 
 mixin Visitor<R> {
   R visitBlockStmt(Block stmt);
+  R visitIfStmt(If stmt);
   R visitExpressionStmt(Expression stmt);
   R visitPrintStmt(Print stmt);
   R visitVarStmt(Var stmt);
@@ -22,6 +23,23 @@ class Block extends Stmt {
   }
 
   final List<Stmt> statements;
+}
+
+class If extends Stmt {
+  If({
+    required this.conditional,
+    required this.thenBranch,
+    required this.elseBranch,
+  });
+
+  @override
+  R accept<R>(Visitor<R> visitor) {
+    return visitor.visitIfStmt(this);
+  }
+
+  final Expr conditional;
+  final Stmt thenBranch;
+  final Stmt? elseBranch;
 }
 
 class Expression extends Stmt {

@@ -51,6 +51,29 @@ class Interpreter with pkg_expr.Visitor<Object?>, pkg_stmt.Visitor<void> {
   }
 
   @override
+  Object? visitLogicalExpr(pkg_expr.Logical expr) {
+    Object? left = _evaluate(expr.left);
+
+    if (expr.operator.type == TokenType.OR) {
+      if (_isTruthy(left)) return left; 
+    } else {
+      if (!_isTruthy(left)) return left; 
+    }
+
+    return _evaluate(expr.right);
+  }
+
+  @override
+  void visitIfStmt(pkg_stmt.If stmt) {
+    final result = _evaluate(stmt.conditional);
+    if (_isTruthy(result)) {
+      _execute(stmt.thenBranch);
+    } else if (stmt.elseBranch != null) {
+      _execute(stmt.elseBranch!);
+    }
+  }
+
+  @override
   Object? visitBlockStmt(pkg_stmt.Block stmt) {
     executeBlock(stmt.statements, Environment(_environment));
     return null;

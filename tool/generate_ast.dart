@@ -10,6 +10,7 @@ void main(List<String> args) {
  defineAst(outputDir, "Expr", [
     "Assign          : Token name, Expr value",
     "Binary          : Expr left, Token operator, Expr right",
+    "Logical         : Expr left, Token operator, Expr right",
     "Grouping        : Expr expression",
     //A note on dart impl: Object is a union type of all other types except i.e. null (`Null` type) is not a subtype of Object, thus the nullable notation (?)
     "Literal         : Object? value",
@@ -20,6 +21,7 @@ void main(List<String> args) {
 
   defineAst(outputDir, "Stmt", [
     "Block           : List<Stmt> statements",
+    "If              : Expr conditional, Stmt thenBranch, Stmt? elseBranch",
     "Expression      : Expr expression",
     "Print           : Expr expression",
     "Var             : Token name, Expr? initializer",
