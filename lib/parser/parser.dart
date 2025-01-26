@@ -8,6 +8,7 @@ import '../ast/stmt.g.dart';
 class Parser {
   final List<Token> tokens;
   int current = 0;
+  int loopDepth = 0;
 
   Parser({required this.tokens});
 
@@ -65,6 +66,15 @@ class Parser {
       return forStatement();
     }
 
+    if (match([TokenType.BREAK])) {
+      consume(TokenType.SEMICOLON, "Expected ';' after break statement");
+
+      if (loopDepth <= 0) {
+        error(previous(), "'break' should be used only inside a loop.");
+      }
+      return Break();
+    }
+
     return expressionStatement();
   }
 
@@ -90,26 +100,36 @@ class Parser {
     }
     consume(TokenType.RIGHT_PAREN, "Expected ')' after ending condition.");
 
-    Stmt body = statement();
-    if (increment != null) {
-      body = Block(statements: [body, Expression(expression: increment)]);
+    try {
+      loopDepth++;
+      Stmt body = statement();
+      if (increment != null) {
+        body = Block(statements: [body, Expression(expression: increment)]);
+      }
+
+      body = While(body: body, condition: condition);
+
+      if (initializer != null) {
+        body = Block(statements: [initializer, body]);
+      }
+
+      return body;
+    } finally {
+      loopDepth--;
     }
-
-    body = While(body: body, condition: condition);
-
-    if (initializer != null) {
-      body = Block(statements: [initializer, body]);
-    }
-
-    return body;
   }
 
   Stmt whileStatement() {
-    consume(TokenType.LEFT_PAREN, "Expected '(' for 'while' condition");
-    Expr expr = expression();
-    consume(TokenType.RIGHT_PAREN, "Expected ')' after ending condition.");
-    Stmt stmt = statement();
-    return While(condition: expr, body: stmt);
+    try {
+      loopDepth++;
+      consume(TokenType.LEFT_PAREN, "Expected '(' for 'while' condition");
+      Expr expr = expression();
+      consume(TokenType.RIGHT_PAREN, "Expected ')' after ending condition.");
+      Stmt stmt = statement();
+      return While(condition: expr, body: stmt);
+    } finally {
+      loopDepth--;
+    }
   }
 
   Stmt ifStatement() {

@@ -5,6 +5,10 @@ import 'package:dlox/environment.dart';
 import 'package:dlox/interpreter/errors/runtime_error.dart';
 import 'package:dlox/scanner/token_type.dart';
 
+class BreakException extends RuntimeError {
+  BreakException() : super.empty();
+}
+
 // Post-order traversal of expressions (syntax tree) to evalute value
 class Interpreter with pkg_expr.Visitor<Object?>, pkg_stmt.Visitor<void> {
   Environment _environment = Environment.root();
@@ -51,10 +55,17 @@ class Interpreter with pkg_expr.Visitor<Object?>, pkg_stmt.Visitor<void> {
   }
 
   @override
+  void visitBreakStmt(pkg_stmt.Break stmt) {
+    throw BreakException();
+  }
+
+  @override
   void visitWhileStmt(pkg_stmt.While stmt) {
-    while(_isTruthy(_evaluate(stmt.condition))) {
-      _execute(stmt.body);
-    }
+    try {
+      while (_isTruthy(_evaluate(stmt.condition))) {
+        _execute(stmt.body);
+      }
+    } on BreakException catch (_) {}
   }
 
   @override
@@ -62,9 +73,9 @@ class Interpreter with pkg_expr.Visitor<Object?>, pkg_stmt.Visitor<void> {
     Object? left = _evaluate(expr.left);
 
     if (expr.operator.type == TokenType.OR) {
-      if (_isTruthy(left)) return left; 
+      if (_isTruthy(left)) return left;
     } else {
-      if (!_isTruthy(left)) return left; 
+      if (!_isTruthy(left)) return left;
     }
 
     return _evaluate(expr.right);

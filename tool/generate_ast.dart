@@ -7,7 +7,7 @@ void main(List<String> args) {
 
   String outputDir = args[0];
 
- defineAst(outputDir, "Expr", [
+  defineAst(outputDir, "Expr", [
     "Assign          : Token name, Expr value",
     "Binary          : Expr left, Token operator, Expr right",
     "Logical         : Expr left, Token operator, Expr right",
@@ -22,6 +22,7 @@ void main(List<String> args) {
   defineAst(outputDir, "Stmt", [
     "Block           : List<Stmt> statements",
     "If              : Expr conditional, Stmt thenBranch, Stmt? elseBranch",
+    "Break           : ",
     "Expression      : Expr expression",
     "Print           : Expr expression",
     "While           : Expr condition, Stmt body",
@@ -44,8 +45,12 @@ void defineAst(String outputDir, String baseName, List<String> types) {
 
   // The AST classes.
   for (String type in types) {
-    String className = type.split(":")[0].trim();
-    String fields = type.split(":")[1].trim();
+    final sp = type.split(":");
+    String className = sp[0].trim();
+    String? fields;
+    if (sp.length > 1 && sp[1].trim().isNotEmpty) {
+      fields = sp[1].trim();
+    }
     defineType(buf, baseName, className, fields);
   }
 
@@ -65,18 +70,23 @@ void defineVisitor(StringBuffer buffer, String baseName, List<String> types) {
 }
 
 void defineType(
-    StringBuffer buffer, String baseName, String className, String fieldList) {
+    StringBuffer buffer, String baseName, String className, String? fieldList) {
   buffer.writeln("class $className extends $baseName {");
 
-  final fields = fieldList.split(", ");
+  final fields = fieldList?.split(", ") ?? [];
 
   // Constructor.
-  buffer.writeln("  $className({");
-  for (String field in fields) {
-    String name = field.split(" ")[1];
-    buffer.writeln("    required this.$name,");
+  buffer.write("  $className(");
+  if (fields.isNotEmpty) {
+    buffer.writeln("{");
+
+    for (String field in fields) {
+      String name = field.split(" ")[1];
+      buffer.writeln("    required this.$name,");
+    }
+    buffer.write("  }");
   }
-  buffer.writeln("  });");
+  buffer.writeln(");");
   buffer.writeln();
 
   // Visitor pattern.
@@ -84,9 +94,11 @@ void defineType(
   buffer.writeln("  R accept<R>(Visitor<R> visitor) {");
   buffer.writeln("    return visitor.visit$className$baseName(this);");
   buffer.writeln("  }");
-  buffer.writeln();
 
   // Store parameters in fields.
+  if (fields.isNotEmpty) {
+    buffer.writeln();
+  }
   for (String field in fields) {
     String type = field.split(" ")[0];
     String name = field.split(" ")[1];

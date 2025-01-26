@@ -72,12 +72,16 @@ if (lOCheckA and lOCheckB) {
 
 // -- loops (while & for)
 
-var whileCounter = 5;
+var whileCounter = 15;
 while (whileCounter > 0) {
+  if (whileCounter == 10) { break; }
   print "Counter: " + whileCounter;
   whileCounter = whileCounter - 1;
 }
 
 for (var a = 0; a < 10; a = a+1) {
+  if (a > 5) {
+    break;
+  }
   print "for a: " + a;
 }

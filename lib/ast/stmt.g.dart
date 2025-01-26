@@ -7,6 +7,7 @@ abstract class Stmt {
 mixin Visitor<R> {
   R visitBlockStmt(Block stmt);
   R visitIfStmt(If stmt);
+  R visitBreakStmt(Break stmt);
   R visitExpressionStmt(Expression stmt);
   R visitPrintStmt(Print stmt);
   R visitWhileStmt(While stmt);
@@ -41,6 +42,15 @@ class If extends Stmt {
   final Expr conditional;
   final Stmt thenBranch;
   final Stmt? elseBranch;
+}
+
+class Break extends Stmt {
+  Break();
+
+  @override
+  R accept<R>(Visitor<R> visitor) {
+    return visitor.visitBreakStmt(this);
+  }
 }
 
 class Expression extends Stmt {
