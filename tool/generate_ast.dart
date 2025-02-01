@@ -11,6 +11,7 @@ void main(List<String> args) {
     "Assign          : Token name, Expr value",
     "Binary          : Expr left, Token operator, Expr right",
     "Logical         : Expr left, Token operator, Expr right",
+    "Call            : Expr callee, Token paren, List<Expr> arguments",
     "Grouping        : Expr expression",
     //A note on dart impl: Object is a union type of all other types except i.e. null (`Null` type) is not a subtype of Object, thus the nullable notation (?)
     "Literal         : Object? value",

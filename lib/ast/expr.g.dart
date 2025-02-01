@@ -8,6 +8,7 @@ mixin Visitor<R> {
   R visitAssignExpr(Assign expr);
   R visitBinaryExpr(Binary expr);
   R visitLogicalExpr(Logical expr);
+  R visitCallExpr(Call expr);
   R visitGroupingExpr(Grouping expr);
   R visitLiteralExpr(Literal expr);
   R visitUnaryExpr(Unary expr);
@@ -62,6 +63,23 @@ class Logical extends Expr {
   final Expr left;
   final Token operator;
   final Expr right;
+}
+
+class Call extends Expr {
+  Call({
+    required this.callee,
+    required this.paren,
+    required this.arguments,
+  });
+
+  @override
+  R accept<R>(Visitor<R> visitor) {
+    return visitor.visitCallExpr(this);
+  }
+
+  final Expr callee;
+  final Token paren;
+  final List<Expr> arguments;
 }
 
 class Grouping extends Expr {

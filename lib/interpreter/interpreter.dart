@@ -3,7 +3,10 @@ import 'package:dlox/ast/stmt.g.dart' as pkg_stmt;
 import 'package:dlox/dlox.dart';
 import 'package:dlox/environment.dart';
 import 'package:dlox/interpreter/errors/runtime_error.dart';
+import 'package:dlox/interpreter/foreign_functions/clock.dart';
 import 'package:dlox/scanner/token_type.dart';
+
+import 'lox_callable.dart';
 
 class BreakException extends RuntimeError {
   BreakException() : super.empty();
@@ -11,9 +14,11 @@ class BreakException extends RuntimeError {
 
 // Post-order traversal of expressions (syntax tree) to evalute value
 class Interpreter with pkg_expr.Visitor<Object?>, pkg_stmt.Visitor<void> {
-  Environment _environment = Environment.root();
+  final Environment _global = Environment.root();
+  late Environment _environment = _global;
 
   void interpret(List<pkg_stmt.Stmt> statements) {
+    _environment.define("clock", ClockFF());
     try {
       for (final statement in statements) {
         _execute(statement);
@@ -52,6 +57,27 @@ class Interpreter with pkg_expr.Visitor<Object?>, pkg_stmt.Visitor<void> {
 
   bool _isEqual(Object? a, Object? b) {
     return a == b;
+  }
+
+  @override
+  Object? visitCallExpr(pkg_expr.Call expr) {
+    Object? callee = _evaluate(expr.callee);
+    if (callee is! LoxCallable) {
+      throw RuntimeError(expr.paren, "Can only call methods or classes.");
+    }
+
+    List<Object> arguments = [];
+    for (Expr arg in expr.arguments) {
+      arguments.add(_evaluate(arg)!);
+    }
+
+    LoxCallable function = callee;
+
+    if (arguments.length != function.arity()) {
+      throw RuntimeError(expr.paren,
+          "Expected ${function.arity()} arguments but got ${arguments.length}.");
+    }
+    return function.call(this, arguments);
   }
 
   @override

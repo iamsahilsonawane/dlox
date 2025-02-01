@@ -295,7 +295,41 @@ class Parser {
       return Unary(operator: operator, right: right);
     }
 
-    return primary();
+    return call();
+  }
+
+  Expr call() {
+    Expr expr = primary();
+    while (true) {
+      if (match([TokenType.LEFT_PAREN])) {
+        expr = finishCall(expr);
+      } else {
+        break;
+      }
+    }
+    return expr;
+  }
+
+  Expr finishCall(Expr callee) {
+    final args = arguments();
+    final paren =
+        consume(TokenType.RIGHT_PAREN, "Expected ')' after arguments");
+    return Call(paren: paren, callee: callee, arguments: args);
+  }
+
+  List<Expr> arguments() {
+    final expressions = <Expr>[];
+
+    if (!check(TokenType.RIGHT_PAREN)) {
+      do {
+        if (expressions.length >= 255) {
+          error(peek(), "Can't have more than 255 arguments.");
+        }
+        expressions.add(expression());
+      } while (match([TokenType.COMMA]));
+    }
+
+    return expressions;
   }
 
   Expr primary() {
@@ -343,6 +377,8 @@ class Parser {
       error(previous(), "Missing left-hand operand.");
       return factor();
     }
+
+    print(previous());
 
     throw error(peek(), "Expect expression.");
   }

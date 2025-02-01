@@ -68,4 +68,10 @@ class AstPrinter with Visitor<String> {
     // TODO: implement visitLogicalExpr
     throw UnimplementedError();
   }
+
+  @override
+  String visitCallExpr(Call expr) {
+    // TODO: implement visitCallExpr
+    throw UnimplementedError();
+  }
 }
