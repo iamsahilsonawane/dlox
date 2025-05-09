@@ -25,6 +25,8 @@ void main(List<String> args) {
     "If              : Expr conditional, Stmt thenBranch, Stmt? elseBranch",
     "Break           : ",
     "Expression      : Expr expression",
+    "LFunction       : Token name, List<Token> params, List<Stmt> body",
+    "Return          : Token token, Expr? value",
     "Print           : Expr expression",
     "While           : Expr condition, Stmt body",
     "Var             : Token name, Expr? initializer",

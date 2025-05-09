@@ -1,0 +1,40 @@
+fun addAndMultipleBy(num1, num2, multiplyBy) {
+    var number3 = multiplyBy;
+    print (num1 + num2) * number3;
+}
+
+addAndMultipleBy(1, 2, 2);
+
+print "-- completed first function call --";
+
+fun testReturnStatement() {
+    for (var i = 0; i < 5; i = i+1){
+        if (i == 3) return 69;
+        print i + 1;
+    }
+}
+
+print testReturnStatement();
+
+print "-- completed second function call --";
+
+fun countDownward(from) {
+    print from;
+    if (from == 1) return from;
+    return countDownward(from - 1);
+}
+
+countDownward(5);
+
+print "-- completed third function call --";
+
+fun fib(n) {
+  if (n <= 1) return n;
+  return fib(n - 2) + fib(n - 1);
+}
+
+for (var i = 0; i < 20; i = i + 1) {
+  print fib(i);
+}
+
+print fib;

@@ -4,6 +4,7 @@ import 'package:dlox/dlox.dart';
 import 'package:dlox/environment.dart';
 import 'package:dlox/interpreter/errors/runtime_error.dart';
 import 'package:dlox/interpreter/foreign_functions/clock.dart';
+import 'package:dlox/interpreter/lox_function.dart';
 import 'package:dlox/scanner/token_type.dart';
 
 import 'lox_callable.dart';
@@ -12,10 +13,15 @@ class BreakException extends RuntimeError {
   BreakException() : super.empty();
 }
 
+class ReturnException extends RuntimeError {
+  ReturnException(this.value) : super.empty();
+  final Object? value;
+}
+
 // Post-order traversal of expressions (syntax tree) to evalute value
 class Interpreter with pkg_expr.Visitor<Object?>, pkg_stmt.Visitor<void> {
-  final Environment _global = Environment.root();
-  late Environment _environment = _global;
+  final Environment global = Environment.root();
+  late Environment _environment = global;
 
   void interpret(List<pkg_stmt.Stmt> statements) {
     _environment.define("clock", ClockFF());
@@ -268,5 +274,21 @@ class Interpreter with pkg_expr.Visitor<Object?>, pkg_stmt.Visitor<void> {
   void _checkNumberOperands(Token operator, Object? left, Object? right) {
     if (left is num && right is num) return;
     throw RuntimeError(operator, "Operands must be numbers");
+  }
+
+  @override
+  void visitLFunctionStmt(pkg_stmt.LFunction stmt) {
+    LoxCallable function = LoxFunction(stmt, _environment);
+    _environment.define(stmt.name.lexeme, function);
+  }
+
+  @override
+  void visitReturnStmt(pkg_stmt.Return stmt) {
+    Object? value;
+    if (stmt.value != null) {
+      value = _evaluate(stmt.value!);
+    }
+
+    throw ReturnException(value);
   }
 }

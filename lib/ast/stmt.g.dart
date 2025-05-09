@@ -9,6 +9,8 @@ mixin Visitor<R> {
   R visitIfStmt(If stmt);
   R visitBreakStmt(Break stmt);
   R visitExpressionStmt(Expression stmt);
+  R visitLFunctionStmt(LFunction stmt);
+  R visitReturnStmt(Return stmt);
   R visitPrintStmt(Print stmt);
   R visitWhileStmt(While stmt);
   R visitVarStmt(Var stmt);
@@ -64,6 +66,38 @@ class Expression extends Stmt {
   }
 
   final Expr expression;
+}
+
+class LFunction extends Stmt {
+  LFunction({
+    required this.name,
+    required this.params,
+    required this.body,
+  });
+
+  @override
+  R accept<R>(Visitor<R> visitor) {
+    return visitor.visitLFunctionStmt(this);
+  }
+
+  final Token name;
+  final List<Token> params;
+  final List<Stmt> body;
+}
+
+class Return extends Stmt {
+  Return({
+    required this.token,
+    required this.value,
+  });
+
+  @override
+  R accept<R>(Visitor<R> visitor) {
+    return visitor.visitReturnStmt(this);
+  }
+
+  final Token token;
+  final Expr? value;
 }
 
 class Print extends Stmt {

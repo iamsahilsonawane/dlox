@@ -4,18 +4,22 @@
 program          → declaration* EOF ;
 declaration      → varDecl | statement;
 varDecl          → "var" IDENTIFIER ("=" expression ";")? ;
+funDecl          → "fun" function ;
+function         → IDENTIFIER "(" parameters? ")" block ;
+parameters       → IDENTIFIER ( "," IDENTIFIER )* ;
 statement        → exprStmt | printStmt | ifExpr
-                   | whileStmt | forStmt | block | break;
-breakStmt        → "break" ";" ; 
+                   | whileStmt | forStmt | block | breakStmt | returnStmt;
+breakStmt        → "break" ";" ;
 ifExpr           → "if" "(" expression ")" statement
                    ( "else" statement )? ;
-forStmt          → "for" "(" (varDecl | exprStmt | ";") 
+forStmt          → "for" "(" (varDecl | exprStmt | ";")
                   expression? ";"
                   expression? ")" statement ;
 whileStmt        → "while" "(" expression ")" statement ;
 block            → "{" declaration* "}" ;
 exprStmt         → expression ";" ;
 printStmt        → "print" expression ";" ;
+returnStmt        → "return" expression? ";" ;
 
 expression       → assignment ;
 assignment       → IDENTIFIER "=" assignment | conditional ;
@@ -31,9 +35,9 @@ unary            → ( "!" | "-" | "--" | "++" ) unary
 postfix          → call ( "--" | "++" )* ;
 call             → primary ( "(" arguments? ")" ) ;
 arguments        → expression ( "," expression )* ;
-primary          → NUMBER | STRING | "true" | "false" | "nil" | "(" expression ")" 
+primary          → NUMBER | STRING | "true" | "false" | "nil" | "(" expression ")"
                  | IDENTIFIER
-                 //error productions 
+                 //error productions
                  | ( "!=" | "==" ) equality
                  | ( ">" | ">=" | "<" | "<=" ) comparison
                  | ( "+" ) term

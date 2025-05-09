@@ -8,12 +8,12 @@ class ClockFF implements LoxCallable {
   }
 
   @override
-  Object call(Interpreter interpreter, List<Object> arguments) {
+  Object? call(Interpreter interpreter, List<Object> arguments) {
     return DateTime.now().millisecondsSinceEpoch;
   }
 
   @override
-    String toString() {
-      return "<native fn>";
-    }
+  String toString() {
+    return "<native fn>";
   }
+}

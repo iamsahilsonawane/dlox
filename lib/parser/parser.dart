@@ -25,6 +25,9 @@ class Parser {
 
   Stmt? declaration() {
     try {
+      if (match([TokenType.FUN])) {
+        return function("function");
+      }
       if (match([TokenType.VAR])) {
         return variableDeclaration();
       }
@@ -34,6 +37,37 @@ class Parser {
       return null;
     }
   }
+
+  Stmt function(String kind) {
+    Token name = consume(TokenType.IDENTIFIER, "Expect $kind name.");
+    consume(TokenType.LEFT_PAREN, "Expect '(' after $kind name.");
+    final parameters = <Token>[];
+    if (!check(TokenType.RIGHT_PAREN)) {
+      do {
+        if (parameters.length >= 255) {
+          error(peek(), "Can't have more than 255 parameters.");
+        }
+        parameters.add(consume(TokenType.IDENTIFIER, "Expect parameter name."));
+      } while (match([TokenType.COMMA]));
+    }
+    consume(TokenType.RIGHT_PAREN, "Expect ')' after parameters.");
+
+    consume(TokenType.LEFT_BRACE, "Expect '{' before $kind body.");
+    final body = blockStatement() as Block;
+    return LFunction(name: name, params: parameters, body: body.statements);
+  }
+
+  // Do we really need this? i've commented it out for now. I think it does the same job as blockStatement, just without Block instance
+  // List<Stmt> block() {
+  //   List<Stmt> statements = [];
+
+  //   while (!check(TokenType.RIGHT_BRACE) && !isAtEnd()) {
+  //     statements.add(declaration()!);
+  //   }
+
+  //   consume(TokenType.RIGHT_BRACE, "Expect '}' after block.");
+  //   return statements;
+  // }
 
   Stmt variableDeclaration() {
     final name = consume(TokenType.IDENTIFIER, "Expected an identifier");
@@ -62,6 +96,10 @@ class Parser {
       return whileStatement();
     }
 
+    if (match([TokenType.RETURN])) {
+      return returnStatement();
+    }
+
     if (match([TokenType.FOR])) {
       return forStatement();
     }
@@ -76,6 +114,16 @@ class Parser {
     }
 
     return expressionStatement();
+  }
+
+  Stmt returnStatement() {
+    Token keyword = previous();
+    Expr? value;
+    if (!check(TokenType.SEMICOLON)) {
+      value = expression();
+    }
+    consume(TokenType.SEMICOLON, "Expect ; after the return value.");
+    return Return(token: keyword, value: value);
   }
 
   Stmt forStatement() {
