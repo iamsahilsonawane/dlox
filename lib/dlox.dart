@@ -6,6 +6,7 @@ import 'package:dlox/ast/expr.g.dart';
 import 'package:dlox/interpreter/errors/runtime_error.dart';
 import 'package:dlox/interpreter/interpreter.dart';
 import 'package:dlox/parser/parser.dart';
+import 'package:dlox/resolver.dart';
 import 'package:dlox/scanner/scanner.dart';
 import 'package:dlox/scanner/token.dart';
 import 'package:dlox/scanner/token_type.dart';
@@ -51,6 +52,12 @@ class DLox {
     List<Stmt> statements = parser.parse();
 
     // Stop if there was a syntax error.
+    if (hadError) return;
+
+    Resolver resolver = Resolver(interpreter);
+    resolver.resolve(statements);
+
+    // Stop if there was a resolution error.
     if (hadError) return;
 
     // print(AstPrinter().print(expression!));

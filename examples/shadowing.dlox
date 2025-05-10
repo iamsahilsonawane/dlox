@@ -1,0 +1,8 @@
+
+
+fun scope(a) {
+    var a = "something else";
+    return a;
+}
+
+print scope("something");

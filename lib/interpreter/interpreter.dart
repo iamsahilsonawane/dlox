@@ -22,6 +22,7 @@ class ReturnException extends RuntimeError {
 class Interpreter with pkg_expr.Visitor<Object?>, pkg_stmt.Visitor<void> {
   final Environment global = Environment.root();
   late Environment _environment = global;
+  final Map<Expr, int> _locals = {};
 
   void interpret(List<pkg_stmt.Stmt> statements) {
     _environment.define("clock", ClockFF());
@@ -49,6 +50,10 @@ class Interpreter with pkg_expr.Visitor<Object?>, pkg_stmt.Visitor<void> {
 
   void _execute(pkg_stmt.Stmt statement) {
     statement.accept(this);
+  }
+
+  void resolve(Expr expr, int depth) {
+    _locals[expr] = depth;
   }
 
   Object? _evaluate(Expr expr) {
@@ -144,8 +149,15 @@ class Interpreter with pkg_expr.Visitor<Object?>, pkg_stmt.Visitor<void> {
 
   @override
   Object? visitAssignExpr(pkg_expr.Assign expr) {
+    final distance = _locals[expr];
     Object? value = expr.value.accept(this);
-    _environment.assign(expr.name, value);
+
+    if (distance != null) {
+      _environment.assignAt(distance, expr.name, value);
+    } else {
+      global.assign(expr.name, value);
+    }
+
     return value;
   }
 
@@ -175,7 +187,11 @@ class Interpreter with pkg_expr.Visitor<Object?>, pkg_stmt.Visitor<void> {
 
   @override
   Object? visitVariableExpr(pkg_expr.Variable expr) {
-    return _environment.get(expr.name);
+    final distance = _locals[expr];
+    if (distance != null) {
+      return _environment.getAt(expr.name, distance);
+    }
+    return global.get(expr.name);
   }
 
   @override
