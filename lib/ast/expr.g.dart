@@ -1,5 +1,7 @@
 import "package:dlox/dlox.dart";
 
+import "stmt.g.dart";
+
 abstract class Expr {
   R accept<R>(Visitor<R> visitor);
 }
@@ -12,6 +14,7 @@ mixin Visitor<R> {
   R visitGroupingExpr(Grouping expr);
   R visitLiteralExpr(Literal expr);
   R visitUnaryExpr(Unary expr);
+  R visitLambdaExpr(Lambda expr);
   R visitConditionalExpr(Conditional expr);
   R visitVariableExpr(Variable expr);
 }
@@ -123,6 +126,21 @@ class Unary extends Expr {
   final Expr right;
 }
 
+class Lambda extends Expr {
+  Lambda({
+    required this.params,
+    required this.body,
+  });
+
+  @override
+  R accept<R>(Visitor<R> visitor) {
+    return visitor.visitLambdaExpr(this);
+  }
+
+  final List<Token> params;
+  final List<Stmt> body;
+}
+
 class Conditional extends Expr {
   Conditional({
     required this.expr,
@@ -152,4 +170,3 @@ class Variable extends Expr {
 
   final Token name;
 }
-

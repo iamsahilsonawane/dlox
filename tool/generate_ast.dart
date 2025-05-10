@@ -16,6 +16,7 @@ void main(List<String> args) {
     //A note on dart impl: Object is a union type of all other types except i.e. null (`Null` type) is not a subtype of Object, thus the nullable notation (?)
     "Literal         : Object? value",
     "Unary           : Token operator, Expr right",
+    "Lambda          : List<Token> params, List<Stmt> body",
     "Conditional     : Expr expr, Expr thenBranch, Expr elseBranch",
     "Variable        : Token name",
   ]);
@@ -25,7 +26,7 @@ void main(List<String> args) {
     "If              : Expr conditional, Stmt thenBranch, Stmt? elseBranch",
     "Break           : ",
     "Expression      : Expr expression",
-    "LFunction       : Token name, List<Token> params, List<Stmt> body",
+    "LFunction       : Token name, Lambda lambda",
     "Return          : Token token, Expr? value",
     "Print           : Expr expression",
     "While           : Expr condition, Stmt body",

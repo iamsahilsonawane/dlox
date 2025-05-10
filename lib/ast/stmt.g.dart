@@ -71,8 +71,7 @@ class Expression extends Stmt {
 class LFunction extends Stmt {
   LFunction({
     required this.name,
-    required this.params,
-    required this.body,
+    required this.lambda,
   });
 
   @override
@@ -81,8 +80,7 @@ class LFunction extends Stmt {
   }
 
   final Token name;
-  final List<Token> params;
-  final List<Stmt> body;
+  final Lambda lambda;
 }
 
 class Return extends Stmt {

@@ -291,4 +291,10 @@ class Interpreter with pkg_expr.Visitor<Object?>, pkg_stmt.Visitor<void> {
 
     throw ReturnException(value);
   }
+
+  @override
+  Object? visitLambdaExpr(pkg_expr.Lambda expr) {
+    return LoxLamda(
+        pkg_expr.Lambda(body: expr.body, params: expr.params), _environment);
+  }
 }

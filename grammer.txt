@@ -5,7 +5,8 @@ program          → declaration* EOF ;
 declaration      → varDecl | statement;
 varDecl          → "var" IDENTIFIER ("=" expression ";")? ;
 funDecl          → "fun" function ;
-function         → IDENTIFIER "(" parameters? ")" block ;
+function         → (IDENTIFIER)? lamda
+lambda           → "(" parameters? ")" block ;
 parameters       → IDENTIFIER ( "," IDENTIFIER )* ;
 statement        → exprStmt | printStmt | ifExpr
                    | whileStmt | forStmt | block | breakStmt | returnStmt;
