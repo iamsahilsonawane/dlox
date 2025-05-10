@@ -4,13 +4,21 @@ import 'package:dlox/ast/stmt.g.dart';
 import 'package:dlox/data_structures/stack.dart';
 import 'package:dlox/dlox.dart';
 import 'package:dlox/interpreter/interpreter.dart';
-import 'package:dlox/scanner/token.dart';
 
 enum FunctionType { none, function }
 
+class VariableUsage {
+  final Token variable;
+  VariableUsageType type;
+
+  VariableUsage(this.variable, this.type);
+}
+
+enum VariableUsageType { defined, declared, used }
+
 class Resolver with pkg_expr.Visitor<Object?>, pkg_stmt.Visitor<void> {
   final Interpreter interpreter;
-  final scopes = Stack<Map<String, bool>>();
+  final scopes = Stack<Map<String, VariableUsage>>();
   FunctionType currentFunctionType = FunctionType.none;
   Resolver(this.interpreter);
 
@@ -21,7 +29,8 @@ class Resolver with pkg_expr.Visitor<Object?>, pkg_stmt.Visitor<void> {
   @override
   Object? visitAssignExpr(pkg_expr.Assign expr) {
     _resolveExpr(expr.value);
-    _resolveLocal(expr, expr.name);
+    _resolveLocal(expr, expr.name, false);
+
     return null;
   }
 
@@ -40,11 +49,17 @@ class Resolver with pkg_expr.Visitor<Object?>, pkg_stmt.Visitor<void> {
   }
 
   void _beginScope() {
-    scopes.push(<String, bool>{});
+    scopes.push(<String, VariableUsage>{});
   }
 
   void _endScope() {
-    scopes.pop();
+    final scope = scopes.pop();
+    for (final entry in scope.entries) {
+      if (entry.value.type != VariableUsageType.used) {
+        DLox.errorAt(
+            entry.value.variable, "Variable declared but was never used");
+      }
+    }
   }
 
   void _resolveStatements(List<Stmt> statements) {
@@ -66,12 +81,12 @@ class Resolver with pkg_expr.Visitor<Object?>, pkg_stmt.Visitor<void> {
     if (scopes.peek[name.lexeme] != null) {
       DLox.errorAt(name, "Already a variable with the same name in the scope.");
     }
-    scopes.peek[name.lexeme] = false;
+    scopes.peek[name.lexeme] = VariableUsage(name, VariableUsageType.declared);
   }
 
   void _define(Token name) {
     if (scopes.isEmpty) return;
-    scopes.peek[name.lexeme] = true;
+    scopes.peek[name.lexeme]!.type = VariableUsageType.defined;
   }
 
   @override
@@ -188,19 +203,23 @@ class Resolver with pkg_expr.Visitor<Object?>, pkg_stmt.Visitor<void> {
 
   @override
   Object? visitVariableExpr(pkg_expr.Variable expr) {
-    if (scopes.isNotEmpty && scopes.peek[expr.name.lexeme] == false) {
+    if (scopes.isNotEmpty &&
+        scopes.peek[expr.name.lexeme]?.type == VariableUsageType.declared) {
       DLox.errorAt(
           expr.name, "Can't read local variable in its own initializer.");
     }
 
-    _resolveLocal(expr, expr.name);
+    _resolveLocal(expr, expr.name, true);
     return null;
   }
 
-  void _resolveLocal(Expr expr, Token name) {
+  void _resolveLocal(Expr expr, Token name, bool isUsed) {
     for (int i = scopes.length - 1; i >= 0; i--) {
       if (scopes[i].containsKey(name.lexeme)) {
         interpreter.resolve(expr, scopes.length - 1 - i);
+        if (isUsed) {
+          scopes.peek[name.lexeme]!.type = VariableUsageType.used;
+        }
         return;
       }
     }
