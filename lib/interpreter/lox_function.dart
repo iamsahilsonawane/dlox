@@ -7,7 +7,7 @@ import 'package:dlox/interpreter/lox_callable.dart';
 class LoxFunction extends LoxLamda {
   final LFunction declaration;
 
-  LoxFunction(this.declaration, Environment closure)
+  LoxFunction(this.declaration, Environment? closure)
       : super(declaration.lambda, closure);
 
   @override
@@ -18,7 +18,7 @@ class LoxFunction extends LoxLamda {
 
 class LoxLamda implements LoxCallable {
   final Lambda lambda;
-  final Environment closure;
+  final Environment? closure;
 
   LoxLamda(this.lambda, this.closure);
 
@@ -32,7 +32,7 @@ class LoxLamda implements LoxCallable {
     final environment = Environment(closure);
 
     for (int i = 0; i < lambda.params.length; i++) {
-      environment.define(lambda.params[i].lexeme, arguments[i]);
+      environment.define(arguments[i]);
     }
 
     try {
