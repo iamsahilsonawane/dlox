@@ -20,12 +20,13 @@ class ReturnException extends RuntimeError {
 
 // Post-order traversal of expressions (syntax tree) to evalute value
 class Interpreter with pkg_expr.Visitor<Object?>, pkg_stmt.Visitor<void> {
-  final Environment global = Environment.root();
-  late Environment _environment = global;
+  Environment? _environment;
   final Map<Expr, int> _locals = {};
+  final Map<String, Object?> globals = {};
+  final Map<Expr, int> slots = {};
 
   void interpret(List<pkg_stmt.Stmt> statements) {
-    _environment.define("clock", ClockFF());
+    globals["clock"] = ClockFF();
     try {
       for (final statement in statements) {
         _execute(statement);
@@ -52,8 +53,9 @@ class Interpreter with pkg_expr.Visitor<Object?>, pkg_stmt.Visitor<void> {
     statement.accept(this);
   }
 
-  void resolve(Expr expr, int depth) {
+  void resolve(Expr expr, int depth, int slot) {
     _locals[expr] = depth;
+    slots[expr] = slot;
   }
 
   Object? _evaluate(Expr expr) {
@@ -149,16 +151,30 @@ class Interpreter with pkg_expr.Visitor<Object?>, pkg_stmt.Visitor<void> {
 
   @override
   Object? visitAssignExpr(pkg_expr.Assign expr) {
-    final distance = _locals[expr];
-    Object? value = expr.value.accept(this);
+    Object? value = _evaluate(expr.value);
 
+    final distance = _locals[expr];
     if (distance != null) {
-      _environment.assignAt(distance, expr.name, value);
+      _environment!.assignAt(distance, slots[expr]!, value);
+    } else if (globals.containsKey(expr.name.lexeme)) {
+      globals[expr.name.lexeme] = value;
     } else {
-      global.assign(expr.name, value);
+      throw RuntimeError(
+          expr.name, "Undefined variable '${expr.name.lexeme}'.");
     }
 
     return value;
+  }
+
+  Object? lookupVariable(Token name, Expr expr) {
+    final distance = _locals[expr];
+    if (distance != null) {
+      return _environment!.getAt(distance, slots[expr]!);
+    } else if (globals.containsKey(name.lexeme)) {
+      return globals[name.lexeme];
+    } else {
+      throw RuntimeError(name, "Undefined variable '${name.lexeme}'.");
+    }
   }
 
   @override
@@ -182,16 +198,20 @@ class Interpreter with pkg_expr.Visitor<Object?>, pkg_stmt.Visitor<void> {
       final result = stmt.initializer!.accept(this);
       value = result;
     }
-    _environment.define(stmt.name.lexeme, value);
+    define(stmt.name, value);
+  }
+
+  void define(Token name, Object? value) {
+    if (_environment != null) {
+      _environment!.define(value);
+    } else {
+      globals[name.lexeme] = value;
+    }
   }
 
   @override
   Object? visitVariableExpr(pkg_expr.Variable expr) {
-    final distance = _locals[expr];
-    if (distance != null) {
-      return _environment.getAt(expr.name, distance);
-    }
-    return global.get(expr.name);
+    return lookupVariable(expr.name, expr);
   }
 
   @override
@@ -295,7 +315,7 @@ class Interpreter with pkg_expr.Visitor<Object?>, pkg_stmt.Visitor<void> {
   @override
   void visitLFunctionStmt(pkg_stmt.LFunction stmt) {
     LoxCallable function = LoxFunction(stmt, _environment);
-    _environment.define(stmt.name.lexeme, function);
+    define(stmt.name, function);
   }
 
   @override

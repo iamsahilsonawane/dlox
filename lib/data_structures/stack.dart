@@ -12,7 +12,7 @@ class Stack<E> {
 
   int get length => _list.length;
 
-  operator [](index) {
+  E operator [](index) {
     return _list[index];
   }
 

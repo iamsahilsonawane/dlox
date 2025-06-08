@@ -8,10 +8,11 @@ import 'package:dlox/interpreter/interpreter.dart';
 enum FunctionType { none, function }
 
 class VariableUsage {
+  final int slot;
   final Token variable;
   VariableUsageType type;
 
-  VariableUsage(this.variable, this.type);
+  VariableUsage(this.slot, this.type, this.variable);
 }
 
 enum VariableUsageType { defined, declared, used }
@@ -78,10 +79,12 @@ class Resolver with pkg_expr.Visitor<Object?>, pkg_stmt.Visitor<void> {
 
   void _declare(Token name) {
     if (scopes.isEmpty) return;
-    if (scopes.peek[name.lexeme] != null) {
+    final scope = scopes.peek;
+    if (scope[name.lexeme] != null) {
       DLox.errorAt(name, "Already a variable with the same name in the scope.");
     }
-    scopes.peek[name.lexeme] = VariableUsage(name, VariableUsageType.declared);
+    scope[name.lexeme] =
+        VariableUsage(scope.length, VariableUsageType.declared, name);
   }
 
   void _define(Token name) {
@@ -147,6 +150,7 @@ class Resolver with pkg_expr.Visitor<Object?>, pkg_stmt.Visitor<void> {
       _declare(param);
       _define(param);
     }
+
     _resolveStatements(lambda.body);
     _endScope();
 
@@ -216,9 +220,10 @@ class Resolver with pkg_expr.Visitor<Object?>, pkg_stmt.Visitor<void> {
   void _resolveLocal(Expr expr, Token name, bool isUsed) {
     for (int i = scopes.length - 1; i >= 0; i--) {
       if (scopes[i].containsKey(name.lexeme)) {
-        interpreter.resolve(expr, scopes.length - 1 - i);
+        interpreter.resolve(
+            expr, scopes.length - 1 - i, scopes[i][name.lexeme]!.slot);
         if (isUsed) {
-          scopes.peek[name.lexeme]!.type = VariableUsageType.used;
+          scopes[i][name.lexeme]!.type = VariableUsageType.used;
         }
         return;
       }
