@@ -1,0 +1,26 @@
+class DevonshireCream {
+  serveOn() {
+    return "Scones";
+  }
+}
+
+class Bagel {
+  eat() {
+    print "eating";
+  }
+} 
+
+class YetAnotherKlass { }
+
+var d = DevonshireCream();
+var b = Bagel();
+var y = YetAnotherKlass();
+
+d.serveSize = 20;
+y.mainThing = b;
+b.meat = d;
+
+print y.mainThing.meat.serveSize;
+y.mainThing.eat();
+
+

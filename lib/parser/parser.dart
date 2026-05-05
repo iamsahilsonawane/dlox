@@ -25,6 +25,9 @@ class Parser {
 
   Stmt? declaration() {
     try {
+      if (match([TokenType.CLASS])) {
+        return classDeclaration();
+      }
       if (check(TokenType.FUN) && checkNext(TokenType.IDENTIFIER)) {
         consume(TokenType.FUN, "");
         return function("function");
@@ -39,7 +42,21 @@ class Parser {
     }
   }
 
-  Stmt function(String kind) {
+  Stmt classDeclaration() {
+    Token name = consume(TokenType.IDENTIFIER, "Expect a class name");
+    consume(TokenType.LEFT_BRACE, "Expect '{' before class body");
+
+    final List<LFunction> methods = [];
+    
+    while (!check(TokenType.RIGHT_BRACE) && !isAtEnd()) {
+      methods.add(function("method"));
+    }
+
+    consume(TokenType.RIGHT_BRACE, "Expect '}' after a class body");
+    return Class(name: name, methods: methods);
+  }
+
+  LFunction function(String kind) {
     Token name = consume(TokenType.IDENTIFIER, "Expect $kind name.");
     return LFunction(name: name, lambda: lambda());
   }
@@ -211,11 +228,12 @@ class Parser {
       if (expr is Variable) {
         Token name = expr.name;
         return Assign(name: name, value: value);
+      } else if (expr is Get) {
+        return LSet(name: expr.name, value: value, object: expr.object);
       }
 
       error(equals, "Invalid assignment target");
-    }
-
+    } 
     return expr;
   }
 
@@ -327,6 +345,9 @@ class Parser {
     while (true) {
       if (match([TokenType.LEFT_PAREN])) {
         expr = finishCall(expr);
+      } else if (match([TokenType.DOT])) {
+        Token name = consume(TokenType.IDENTIFIER, "Expect property name after '.'");
+        expr = Get(object: expr, name: name);
       } else {
         break;
       }

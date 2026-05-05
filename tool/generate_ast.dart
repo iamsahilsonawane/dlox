@@ -12,10 +12,12 @@ void main(List<String> args) {
     "Binary          : Expr left, Token operator, Expr right",
     "Logical         : Expr left, Token operator, Expr right",
     "Call            : Expr callee, Token paren, List<Expr> arguments",
+    "Get             : Expr object, Token name",
     "Grouping        : Expr expression",
     //A note on dart impl: Object is a union type of all other types except i.e. null (`Null` type) is not a subtype of Object, thus the nullable notation (?)
     "Literal         : Object? value",
     "Unary           : Token operator, Expr right",
+    "LSet            : Expr object, Token name, Expr value",
     "Lambda          : List<Token> params, List<Stmt> body",
     "Conditional     : Expr expr, Expr thenBranch, Expr elseBranch",
     "Variable        : Token name",
@@ -23,6 +25,7 @@ void main(List<String> args) {
 
   defineAst(outputDir, "Stmt", [
     "Block           : List<Stmt> statements",
+    "Class           : Token name, List<LFunction> methods",
     "If              : Expr conditional, Stmt thenBranch, Stmt? elseBranch",
     "Break           : ",
     "Expression      : Expr expression",
@@ -41,6 +44,9 @@ void defineAst(String outputDir, String baseName, List<String> types) {
   StringBuffer buf = StringBuffer();
 
   buf.writeln("import \"package:dlox/dlox.dart\";\n");
+  if (baseName == "Expr") { 
+    buf.writeln("import \"stmt.g.dart\";\n");
+  }
   buf.writeln("abstract class $baseName {");
   buf.writeln("  R accept<R>(Visitor<R> visitor);");
   buf.writeln("}\n");

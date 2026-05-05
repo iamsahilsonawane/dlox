@@ -4,6 +4,7 @@ import 'package:dlox/dlox.dart';
 import 'package:dlox/environment.dart';
 import 'package:dlox/interpreter/errors/runtime_error.dart';
 import 'package:dlox/interpreter/foreign_functions/clock.dart';
+import 'package:dlox/interpreter/lox_class.dart';
 import 'package:dlox/interpreter/lox_function.dart';
 import 'package:dlox/scanner/token_type.dart';
 
@@ -332,5 +333,37 @@ class Interpreter with pkg_expr.Visitor<Object?>, pkg_stmt.Visitor<void> {
   Object? visitLambdaExpr(pkg_expr.Lambda expr) {
     return LoxLamda(
         pkg_expr.Lambda(body: expr.body, params: expr.params), _environment);
+  }
+
+  @override
+  void visitClassStmt(pkg_stmt.Class stmt) {
+    final Map<String, LoxFunction> methods = {};
+    for (final method in stmt.methods) {
+      methods[method.name.lexeme] = LoxFunction(method, _environment);
+    }
+    LoxClass klass = LoxClass(stmt.name.lexeme, methods);
+    define(stmt.name, klass);
+  }
+
+  @override
+  Object? visitGetExpr(pkg_expr.Get expr) {
+    Object? object = _evaluate(expr.object);
+    if (object is LoxInstance) {
+      return object.get(expr.name);
+    }
+
+    throw RuntimeError(expr.name, "Only instances have properties");
+  }
+
+  @override
+  Object? visitLSetExpr(pkg_expr.LSet expr) {
+    final caller = _evaluate(expr.object);
+    if (caller is! LoxInstance) {
+      throw RuntimeError(expr.name, "Only instances have properties");
+    }
+
+    final value = _evaluate(expr.value);
+    caller.set(expr.name, value!);
+    return value;
   }
 }

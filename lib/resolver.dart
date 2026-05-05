@@ -5,7 +5,7 @@ import 'package:dlox/data_structures/stack.dart';
 import 'package:dlox/dlox.dart';
 import 'package:dlox/interpreter/interpreter.dart';
 
-enum FunctionType { none, function }
+enum FunctionType { none, function, method }
 
 class VariableUsage {
   final int slot;
@@ -234,5 +234,29 @@ class Resolver with pkg_expr.Visitor<Object?>, pkg_stmt.Visitor<void> {
   void visitWhileStmt(pkg_stmt.While stmt) {
     _resolveExpr(stmt.condition);
     _resolveStmt(stmt.body);
+  }
+
+  @override
+  void visitClassStmt(pkg_stmt.Class stmt) {
+    _declare(stmt.name);
+    _define(stmt.name);
+
+    for (final method in stmt.methods) {
+      FunctionType declaration = FunctionType.method;
+      _resolveFunction(method.lambda, declaration);
+    }
+  }
+
+  @override
+  Object? visitGetExpr(pkg_expr.Get expr) {
+    _resolveExpr(expr.object);
+    return null;
+  }
+
+  @override
+  Object? visitLSetExpr(pkg_expr.LSet expr) {
+    _resolveExpr(expr.object);
+    _resolveExpr(expr.value);
+    return null;
   }
 }

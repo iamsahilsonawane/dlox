@@ -11,9 +11,11 @@ mixin Visitor<R> {
   R visitBinaryExpr(Binary expr);
   R visitLogicalExpr(Logical expr);
   R visitCallExpr(Call expr);
+  R visitGetExpr(Get expr);
   R visitGroupingExpr(Grouping expr);
   R visitLiteralExpr(Literal expr);
   R visitUnaryExpr(Unary expr);
+  R visitLSetExpr(LSet expr);
   R visitLambdaExpr(Lambda expr);
   R visitConditionalExpr(Conditional expr);
   R visitVariableExpr(Variable expr);
@@ -85,6 +87,21 @@ class Call extends Expr {
   final List<Expr> arguments;
 }
 
+class Get extends Expr {
+  Get({
+    required this.object,
+    required this.name,
+  });
+
+  @override
+  R accept<R>(Visitor<R> visitor) {
+    return visitor.visitGetExpr(this);
+  }
+
+  final Expr object;
+  final Token name;
+}
+
 class Grouping extends Expr {
   Grouping({
     required this.expression,
@@ -124,6 +141,23 @@ class Unary extends Expr {
 
   final Token operator;
   final Expr right;
+}
+
+class LSet extends Expr {
+  LSet({
+    required this.object,
+    required this.name,
+    required this.value,
+  });
+
+  @override
+  R accept<R>(Visitor<R> visitor) {
+    return visitor.visitLSetExpr(this);
+  }
+
+  final Expr object;
+  final Token name;
+  final Expr value;
 }
 
 class Lambda extends Expr {
@@ -170,3 +204,4 @@ class Variable extends Expr {
 
   final Token name;
 }
+
