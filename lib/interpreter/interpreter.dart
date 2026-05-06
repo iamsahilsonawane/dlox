@@ -366,4 +366,9 @@ class Interpreter with pkg_expr.Visitor<Object?>, pkg_stmt.Visitor<void> {
     caller.set(expr.name, value!);
     return value;
   }
+
+  @override
+  Object? visitThisExpr(pkg_expr.This expr) {
+    return lookupVariable(expr.keyword, expr);
+  }
 }

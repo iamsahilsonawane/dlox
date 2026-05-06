@@ -92,4 +92,10 @@ class AstPrinter with Visitor<String> {
     // TODO: implement visitLSetExpr
     throw UnimplementedError();
   }
+
+  @override
+  String visitThisExpr(This expr) {
+    // TODO: implement visitThisExpr
+    throw UnimplementedError();
+  }
 }

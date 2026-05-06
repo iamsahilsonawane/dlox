@@ -18,6 +18,7 @@ void main(List<String> args) {
     "Literal         : Object? value",
     "Unary           : Token operator, Expr right",
     "LSet            : Expr object, Token name, Expr value",
+    "This            : Token keyword",
     "Lambda          : List<Token> params, List<Stmt> body",
     "Conditional     : Expr expr, Expr thenBranch, Expr elseBranch",
     "Variable        : Token name",
@@ -44,7 +45,7 @@ void defineAst(String outputDir, String baseName, List<String> types) {
   StringBuffer buf = StringBuffer();
 
   buf.writeln("import \"package:dlox/dlox.dart\";\n");
-  if (baseName == "Expr") { 
+  if (baseName == "Expr") {
     buf.writeln("import \"stmt.g.dart\";\n");
   }
   buf.writeln("abstract class $baseName {");

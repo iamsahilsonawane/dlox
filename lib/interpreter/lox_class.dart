@@ -1,4 +1,3 @@
-
 import 'package:dlox/interpreter/errors/runtime_error.dart';
 import 'package:dlox/interpreter/interpreter.dart';
 import 'package:dlox/interpreter/lox_callable.dart';
@@ -33,19 +32,22 @@ class LoxClass implements LoxCallable {
   }
 }
 
-
 class LoxInstance {
   final LoxClass klass;
   final Map<String, Object> fields = {};
-  
+
   LoxInstance(this.klass);
 
   Object get(Token name) {
     if (fields.containsKey(name.lexeme)) {
       return fields[name.lexeme]!;
-    } 
+    }
 
-    final method = klass.getMethod(name.lexeme) ;
+    final method = klass.getMethod(name.lexeme);
+    if (method != null) {
+      return method.bind(this);
+    }
+
     if (method != null) {
       return method;
     }
@@ -59,7 +61,6 @@ class LoxInstance {
 
   @override
   String toString() {
-    return "${klass.name} instance"; 
+    return "${klass.name} instance";
   }
 }
-

@@ -7,12 +7,15 @@ import 'package:dlox/interpreter/interpreter.dart';
 
 enum FunctionType { none, function, method }
 
+enum ClassType { none, klass }
+
 class VariableUsage {
   final int slot;
   final Token variable;
   VariableUsageType type;
+  final bool synthetic;
 
-  VariableUsage(this.slot, this.type, this.variable);
+  VariableUsage(this.slot, this.type, this.variable, {this.synthetic = false});
 }
 
 enum VariableUsageType { defined, declared, used }
@@ -21,6 +24,7 @@ class Resolver with pkg_expr.Visitor<Object?>, pkg_stmt.Visitor<void> {
   final Interpreter interpreter;
   final scopes = Stack<Map<String, VariableUsage>>();
   FunctionType currentFunctionType = FunctionType.none;
+  ClassType currentClass = ClassType.none;
   Resolver(this.interpreter);
 
   void resolve(List<pkg_stmt.Stmt> statements) {
@@ -56,9 +60,10 @@ class Resolver with pkg_expr.Visitor<Object?>, pkg_stmt.Visitor<void> {
   void _endScope() {
     final scope = scopes.pop();
     for (final entry in scope.entries) {
+      if (entry.value.synthetic) continue;
       if (entry.value.type != VariableUsageType.used) {
-        DLox.errorAt(
-            entry.value.variable, "Variable declared but was never used");
+        DLox.errorAt(entry.value.variable,
+            "Variable '${entry.key}' declared but was never used");
       }
     }
   }
@@ -238,13 +243,27 @@ class Resolver with pkg_expr.Visitor<Object?>, pkg_stmt.Visitor<void> {
 
   @override
   void visitClassStmt(pkg_stmt.Class stmt) {
+    final enclosingClassType = currentClass;
+    currentClass = ClassType.klass;
+
     _declare(stmt.name);
     _define(stmt.name);
+
+    _beginScope();
+    scopes.peek["this"] = VariableUsage(
+      scopes.peek.length,
+      VariableUsageType.declared,
+      stmt.name,
+      synthetic: true,
+    );
 
     for (final method in stmt.methods) {
       FunctionType declaration = FunctionType.method;
       _resolveFunction(method.lambda, declaration);
     }
+
+    _endScope();
+    currentClass = enclosingClassType;
   }
 
   @override
@@ -257,6 +276,17 @@ class Resolver with pkg_expr.Visitor<Object?>, pkg_stmt.Visitor<void> {
   Object? visitLSetExpr(pkg_expr.LSet expr) {
     _resolveExpr(expr.object);
     _resolveExpr(expr.value);
+    return null;
+  }
+
+  @override
+  Object? visitThisExpr(pkg_expr.This expr) {
+    if (currentClass != ClassType.klass &&
+        currentFunctionType != FunctionType.none) {
+      DLox.errorAt(expr.keyword,
+          "'this' keyword can only be used inside a class method");
+    }
+    _resolveLocal(expr, expr.keyword, true);
     return null;
   }
 }

@@ -47,7 +47,7 @@ class Parser {
     consume(TokenType.LEFT_BRACE, "Expect '{' before class body");
 
     final List<LFunction> methods = [];
-    
+
     while (!check(TokenType.RIGHT_BRACE) && !isAtEnd()) {
       methods.add(function("method"));
     }
@@ -233,7 +233,7 @@ class Parser {
       }
 
       error(equals, "Invalid assignment target");
-    } 
+    }
     return expr;
   }
 
@@ -346,7 +346,8 @@ class Parser {
       if (match([TokenType.LEFT_PAREN])) {
         expr = finishCall(expr);
       } else if (match([TokenType.DOT])) {
-        Token name = consume(TokenType.IDENTIFIER, "Expect property name after '.'");
+        Token name =
+            consume(TokenType.IDENTIFIER, "Expect property name after '.'");
         expr = Get(object: expr, name: name);
       } else {
         break;
@@ -408,6 +409,10 @@ class Parser {
 
       consume(TokenType.RIGHT_PAREN, "Expect ')' after expression.");
       return Grouping(expression: expr);
+    }
+
+    if (match([TokenType.THIS])) {
+      return This(keyword: previous());
     }
 
     if (match([TokenType.IDENTIFIER])) {

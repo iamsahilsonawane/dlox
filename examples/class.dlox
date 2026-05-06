@@ -8,7 +8,7 @@ class Bagel {
   eat() {
     print "eating";
   }
-} 
+}
 
 class YetAnotherKlass { }
 
@@ -22,5 +22,3 @@ b.meat = d;
 
 print y.mainThing.meat.serveSize;
 y.mainThing.eat();
-
-

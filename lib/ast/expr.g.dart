@@ -16,6 +16,7 @@ mixin Visitor<R> {
   R visitLiteralExpr(Literal expr);
   R visitUnaryExpr(Unary expr);
   R visitLSetExpr(LSet expr);
+  R visitThisExpr(This expr);
   R visitLambdaExpr(Lambda expr);
   R visitConditionalExpr(Conditional expr);
   R visitVariableExpr(Variable expr);
@@ -158,6 +159,19 @@ class LSet extends Expr {
   final Expr object;
   final Token name;
   final Expr value;
+}
+
+class This extends Expr {
+  This({
+    required this.keyword,
+  });
+
+  @override
+  R accept<R>(Visitor<R> visitor) {
+    return visitor.visitThisExpr(this);
+  }
+
+  final Token keyword;
 }
 
 class Lambda extends Expr {
