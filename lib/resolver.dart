@@ -5,7 +5,7 @@ import 'package:dlox/data_structures/stack.dart';
 import 'package:dlox/dlox.dart';
 import 'package:dlox/interpreter/interpreter.dart';
 
-enum FunctionType { none, function, method }
+enum FunctionType { none, function, method, initializer }
 
 enum ClassType { none, klass }
 
@@ -191,6 +191,9 @@ class Resolver with pkg_expr.Visitor<Object?>, pkg_stmt.Visitor<void> {
       DLox.errorAt(stmt.token, "Can't return from top-level code.");
     }
     if (stmt.value != null) {
+      if (currentFunctionType == FunctionType.initializer) {
+        DLox.errorAt(stmt.token, "Can't return a value from initializer");
+      }
       _resolveExpr(stmt.value!);
     }
   }
@@ -259,6 +262,9 @@ class Resolver with pkg_expr.Visitor<Object?>, pkg_stmt.Visitor<void> {
 
     for (final method in stmt.methods) {
       FunctionType declaration = FunctionType.method;
+      if (method.name.lexeme == "init") {
+        declaration = FunctionType.initializer;
+      }
       _resolveFunction(method.lambda, declaration);
     }
 

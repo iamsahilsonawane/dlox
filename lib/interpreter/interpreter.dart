@@ -339,7 +339,8 @@ class Interpreter with pkg_expr.Visitor<Object?>, pkg_stmt.Visitor<void> {
   void visitClassStmt(pkg_stmt.Class stmt) {
     final Map<String, LoxFunction> methods = {};
     for (final method in stmt.methods) {
-      methods[method.name.lexeme] = LoxFunction(method, _environment);
+      methods[method.name.lexeme] = LoxFunction(method, _environment,
+          isInitializer: method.name.lexeme == "init");
     }
     LoxClass klass = LoxClass(stmt.name.lexeme, methods);
     define(stmt.name, klass);

@@ -22,12 +22,20 @@ class LoxClass implements LoxCallable {
 
   @override
   int arity() {
+    final constructor = getMethod("init");
+    if (constructor != null) {
+      return constructor.arity();
+    }
     return 0;
   }
 
   @override
   Object? call(Interpreter interpreter, List<Object> arguments) {
     LoxInstance instance = LoxInstance(this);
+    final constructor = getMethod("init");
+    if (constructor != null) {
+      constructor.bind(instance).call(interpreter, arguments);
+    }
     return instance;
   }
 }

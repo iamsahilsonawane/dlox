@@ -7,14 +7,25 @@ import 'package:dlox/interpreter/lox_class.dart';
 
 class LoxFunction extends LoxLamda {
   final LFunction declaration;
+  final bool isInitializer;
 
-  LoxFunction(this.declaration, Environment? closure)
+  LoxFunction(this.declaration, Environment? closure,
+      {this.isInitializer = false})
       : super(declaration.lambda, closure);
 
   LoxFunction bind(LoxInstance instance) {
     Environment env = Environment(closure);
     env.define(instance);
-    return LoxFunction(declaration, env);
+    return LoxFunction(declaration, env, isInitializer: isInitializer);
+  }
+
+  @override
+  Object? call(Interpreter interpreter, List<Object> arguments) {
+    final result = super.call(interpreter, arguments);
+    if (isInitializer) {
+      return closure?.getAt(0, 0); //'this' is the first definition in the class environment, therefore 0
+    }
+    return result;
   }
 
   @override

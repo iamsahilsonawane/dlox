@@ -3,10 +3,15 @@ class Cake {
     var adjective = "delicious";
     print "The " + this.flavor + " cake is " + adjective + "!";
   }
+
+  init(flavor) {
+    this.flavor = flavor;
+    return; //optional
+  }
 }
 
-var cake = Cake();
-cake.flavor = "German chocolate";
+var cake = Cake("German chocolate");
+//cake.flavor = "German chocolate";
 cake.taste(); // Prints "The German chocolate cake is delicious!".
 
 
@@ -25,6 +30,9 @@ var callback = Thing().getCallback();
 callback();
 
 
-fun notAFunction() {
-    print this; //should throw
-}
+//fun notAFunction() {
+//    print this; //should throw
+//}
+
+var cake = Cake("German chocolate").init("German chocolate");
+cake.taste();
