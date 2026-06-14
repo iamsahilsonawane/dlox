@@ -349,11 +349,10 @@ class Interpreter with pkg_expr.Visitor<Object?>, pkg_stmt.Visitor<void> {
       staticMethods[method.name.lexeme] = LoxFunction(method, _environment);
     }
 
-    LoxClass klass = LoxClass(stmt.name.lexeme, methods);
-    final metaclass = LoxMetaclass(
-        LoxClass("${stmt.name.lexeme} metaclass", staticMethods), klass);
+    LoxClass metaclass = LoxClass("${stmt.name.lexeme} metaclass", staticMethods, null);
+    LoxClass klass = LoxClass(stmt.name.lexeme, methods, metaclass);
 
-    define(stmt.name, metaclass);
+    define(stmt.name, klass);
   }
 
   @override

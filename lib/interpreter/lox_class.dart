@@ -5,11 +5,11 @@ import 'package:dlox/interpreter/lox_function.dart';
 
 import '../scanner/token.dart';
 
-class LoxClass implements LoxCallable {
+class LoxClass extends LoxInstance implements LoxCallable {
   final String name;
   final Map<String, LoxFunction> methods;
 
-  LoxClass(this.name, this.methods);
+  LoxClass(this.name, this.methods, LoxClass? metaclass) : super(metaclass);
 
   LoxFunction? getMethod(String name) {
     return methods[name];
@@ -37,25 +37,6 @@ class LoxClass implements LoxCallable {
       constructor.bind(instance).call(interpreter, arguments);
     }
     return instance;
-  }
-}
-
-class LoxMetaclass extends LoxInstance implements LoxCallable {
-  final LoxClass targetKlass;
-
-  LoxMetaclass(LoxClass metaclass, this.targetKlass) : super(metaclass); //we're creating a LoxInstance for the metaclass, so actions on the metaclass happens
-
-  @override
-  int arity() => targetKlass.arity();
-
-  @override
-  Object? call(Interpreter interpreter, List<Object> arguments) {
-    return targetKlass.call(interpreter, arguments);
-  }
-
-  @override
-  String toString() {
-    return targetKlass.toString();
   }
 }
 
