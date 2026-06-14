@@ -7,7 +7,7 @@ import 'package:dlox/interpreter/interpreter.dart';
 
 enum FunctionType { none, function, method, initializer }
 
-enum ClassType { none, klass, subclass }
+enum ClassType { none, klass, subclass, trait }
 
 class VariableUsage {
   final int slot;
@@ -274,6 +274,10 @@ class Resolver with pkg_expr.Visitor<Object?>, pkg_stmt.Visitor<void> {
       );
     }
 
+    for (final trait in stmt.traits) {
+      _resolveExpr(trait);
+    }
+
     _beginScope();
     scopes.peek["this"] = VariableUsage(
       scopes.peek.length,
@@ -319,6 +323,8 @@ class Resolver with pkg_expr.Visitor<Object?>, pkg_stmt.Visitor<void> {
   @override
   Object? visitThisExpr(pkg_expr.This expr) {
     if (currentClass != ClassType.klass &&
+        currentClass != ClassType.subclass &&
+        currentClass != ClassType.trait &&
         currentFunctionType != FunctionType.none) {
       DLox.errorAt(expr.keyword,
           "'this' keyword can only be used inside a class method");
@@ -330,14 +336,45 @@ class Resolver with pkg_expr.Visitor<Object?>, pkg_stmt.Visitor<void> {
   @override
   Object? visitSuperExpr(pkg_expr.Super expr) {
     if (currentClass == ClassType.none) {
-      DLox.errorAt(expr.keyword,
-          "Can't use 'super' outside of a class.");
+      DLox.errorAt(expr.keyword, "Can't use 'super' outside of a class.");
     } else if (currentClass != ClassType.subclass) {
-      DLox.errorAt(expr.keyword,
-          "Can't use 'super' in a class with no superclass.");
+      DLox.errorAt(
+          expr.keyword, "Can't use 'super' in a class with no superclass.");
+    } else if (currentClass == ClassType.trait) {
+      DLox.errorAt(expr.keyword, "Can't use 'super' in a trait");
     }
 
     _resolveLocal(expr, expr.keyword, false);
     return null;
+  }
+
+  @override
+  void visitTraitStmt(pkg_stmt.Trait stmt) {
+    final enclosingClassType = currentClass;
+    currentClass = ClassType.trait;
+
+    _declare(stmt.name);
+    _define(stmt.name);
+
+    for (final trait in stmt.traits) {
+      _resolveExpr(trait);
+    }
+
+    _beginScope();
+    scopes.peek["this"] = VariableUsage(
+      scopes.peek.length,
+      VariableUsageType.declared,
+      stmt.name,
+      synthetic: true,
+    );
+
+    for (final method in stmt.methods) {
+      FunctionType declaration = FunctionType.method;
+      _resolveFunction(method.lambda, declaration);
+    }
+
+    _endScope();
+
+    currentClass = enclosingClassType;
   }
 }

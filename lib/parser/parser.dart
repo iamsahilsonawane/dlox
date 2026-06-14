@@ -28,6 +28,10 @@ class Parser {
       if (match([TokenType.CLASS])) {
         return classDeclaration();
       }
+      if (match([TokenType.TRAIT])) {
+        return traitDeclaration();
+      }
+
       if (check(TokenType.FUN) && checkNext(TokenType.IDENTIFIER)) {
         consume(TokenType.FUN, "");
         return function("function");
@@ -42,6 +46,34 @@ class Parser {
     }
   }
 
+  Stmt traitDeclaration() {
+    Token name = consume(TokenType.IDENTIFIER, "Expect a class name");
+
+    List<Expr> traits = withTraits();
+
+    consume(TokenType.LEFT_BRACE, "Expect '{' before class body");
+
+    final List<LFunction> methods = [];
+    while (!check(TokenType.RIGHT_BRACE) && !isAtEnd()) {
+      methods.add(function("method"));
+    }
+
+    consume(TokenType.RIGHT_BRACE, "Expect '}' after a class body");
+    return Trait(name: name, traits: traits, methods: methods);
+  }
+
+  List<Expr> withTraits() {
+    final List<Expr> traits = [];
+    if (match([TokenType.WITH])) {
+      do {
+        final name = consume(TokenType.IDENTIFIER, "Expected Trait name");
+        traits.add(Variable(name: name));
+      } while (match([TokenType.COMMA]));
+    }
+
+    return traits;
+  }
+
   Stmt classDeclaration() {
     Token name = consume(TokenType.IDENTIFIER, "Expect a class name");
 
@@ -52,6 +84,8 @@ class Parser {
           consume(TokenType.IDENTIFIER, "Expected name for the super class");
       superclass = Variable(name: name);
     }
+
+    List<Expr> traits = withTraits();
 
     consume(TokenType.LEFT_BRACE, "Expect '{' before class body");
 
@@ -71,6 +105,7 @@ class Parser {
     return Class(
         name: name,
         superclass: superclass,
+        traits: traits,
         methods: methods,
         staticMethods: staticMethods);
   }

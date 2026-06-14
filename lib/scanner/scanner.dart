@@ -231,6 +231,8 @@ class Scanner {
   static const Map<String, TokenType> _keywords = {
     "and": TokenType.AND,
     "class": TokenType.CLASS,
+    "with": TokenType.WITH,
+    "trait": TokenType.TRAIT,
     "else": TokenType.ELSE,
     "false": TokenType.FALSE,
     "for": TokenType.FOR,

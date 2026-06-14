@@ -2,8 +2,9 @@
 
 ### Syntax Grammer
 program          → declaration* EOF ;
-declaration      → classDecl | funDecl | varDecl | statement ;
+declaration      → classDecl | funDecl | varDecl | statement | traitDecl ;
 classDecl        → "class" (IDENTIFIER ("<" IDENTIFIER)? "{" function* "}") | function ;
+traitDecl        → "trait" (IDENTIFIER "{" function* "}");
 varDecl          → "var" IDENTIFIER ("=" expression ";")? ;
 funDecl          → "fun" function ;
 function         → (IDENTIFIER)? lamda

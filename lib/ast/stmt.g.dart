@@ -7,6 +7,7 @@ abstract class Stmt {
 mixin Visitor<R> {
   R visitBlockStmt(Block stmt);
   R visitClassStmt(Class stmt);
+  R visitTraitStmt(Trait stmt);
   R visitIfStmt(If stmt);
   R visitBreakStmt(Break stmt);
   R visitExpressionStmt(Expression stmt);
@@ -33,6 +34,7 @@ class Block extends Stmt {
 class Class extends Stmt {
   Class({
     required this.name,
+    required this.traits,
     required this.superclass,
     required this.methods,
     required this.staticMethods,
@@ -44,9 +46,27 @@ class Class extends Stmt {
   }
 
   final Token name;
+  final List<Expr> traits;
   final Variable? superclass;
   final List<LFunction> methods;
   final List<LFunction> staticMethods;
+}
+
+class Trait extends Stmt {
+  Trait({
+    required this.name,
+    required this.traits,
+    required this.methods,
+  });
+
+  @override
+  R accept<R>(Visitor<R> visitor) {
+    return visitor.visitTraitStmt(this);
+  }
+
+  final Token name;
+  final List<Expr> traits;
+  final List<LFunction> methods;
 }
 
 class If extends Stmt {

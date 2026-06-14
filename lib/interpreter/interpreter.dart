@@ -6,6 +6,7 @@ import 'package:dlox/interpreter/errors/runtime_error.dart';
 import 'package:dlox/interpreter/foreign_functions/clock.dart';
 import 'package:dlox/interpreter/lox_class.dart';
 import 'package:dlox/interpreter/lox_function.dart';
+import 'package:dlox/interpreter/lox_trait.dart';
 import 'package:dlox/scanner/token_type.dart';
 
 import 'lox_callable.dart';
@@ -351,7 +352,7 @@ class Interpreter with pkg_expr.Visitor<Object?>, pkg_stmt.Visitor<void> {
       _environment!.define(superclass);
     }
 
-    final Map<String, LoxFunction> methods = {};
+    final Map<String, LoxFunction> methods = applyTraits(stmt.traits);
     final Map<String, LoxFunction> staticMethods = {};
 
     for (final method in stmt.methods) {
@@ -409,13 +410,51 @@ class Interpreter with pkg_expr.Visitor<Object?>, pkg_stmt.Visitor<void> {
   Object? visitSuperExpr(pkg_expr.Super expr) {
     final LoxClass superclass = lookupVariable(expr.keyword, expr) as LoxClass;
     final int? distance = _locals[expr];
-    final LoxInstance object =
-        _environment!.getAt(distance! - 1, 0) as LoxInstance; //this is the first one in the slot always
+    final LoxInstance object = _environment!.getAt(distance! - 1, 0)
+        as LoxInstance; //this is the first one in the slot always
     final LoxFunction? method = superclass.getMethod(expr.method.lexeme);
     if (method == null) {
       throw RuntimeError(
           expr.method, "Undefined property '${expr.method.lexeme}'.");
     }
     return method.bind(object);
+  }
+
+  @override
+  void visitTraitStmt(pkg_stmt.Trait stmt) {
+    final Map<String, LoxFunction> methods = applyTraits(stmt.traits);
+    for (final method in stmt.methods) {
+      if (methods.containsKey(method.name.lexeme)) {
+        throw RuntimeError(method.name,
+            "A previous trait declares a method named '${method.name.lexeme}'.");
+      }
+      methods[method.name.lexeme] = LoxFunction(method, _environment);
+    }
+
+    LoxTrait trait = LoxTrait(stmt.name, methods);
+    define(stmt.name, trait);
+  }
+
+  Map<String, LoxFunction> applyTraits(List<Expr> traits) {
+    Map<String, LoxFunction> methods = {};
+
+    for (Expr traitExpr in traits) {
+      Object? traitObject = _evaluate(traitExpr);
+      if (traitObject is! LoxTrait) {
+        Token name = (traitExpr as pkg_expr.Variable).name;
+        throw RuntimeError(name, "'${name.lexeme}' is not a trait.");
+      }
+
+      LoxTrait trait = traitObject;
+      for (String name in trait.methods.keys) {
+        if (methods.containsKey(name)) {
+          throw RuntimeError(
+              trait.name, "A previous trait declares a method named '$name'.");
+        }
+        methods[name] = trait.methods[name]!;
+      }
+    }
+
+    return methods;
   }
 }
