@@ -26,7 +26,7 @@ void main(List<String> args) {
 
   defineAst(outputDir, "Stmt", [
     "Block           : List<Stmt> statements",
-    "Class           : Token name, List<LFunction> methods",
+    "Class           : Token name, List<LFunction> methods, List<LFunction> staticMethods",
     "If              : Expr conditional, Stmt thenBranch, Stmt? elseBranch",
     "Break           : ",
     "Expression      : Expr expression",

@@ -1,0 +1,25 @@
+class Math {
+  class square(n) {
+    return n * n;
+  }
+
+  add(n, m) {
+    return n + m;
+  }
+}
+
+print Math;
+print Math.square(2);
+var a = Math();
+print a;
+print a.add(2,3);
+
+
+Math.square = 2;
+print Math.square;
+
+Math.square = fun (p) {
+    print "ping " + p;
+};
+
+Math.square("pong");

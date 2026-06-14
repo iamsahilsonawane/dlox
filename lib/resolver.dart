@@ -268,6 +268,10 @@ class Resolver with pkg_expr.Visitor<Object?>, pkg_stmt.Visitor<void> {
       _resolveFunction(method.lambda, declaration);
     }
 
+    for (final method in stmt.staticMethods) {
+      _resolveFunction(method.lambda, FunctionType.function);
+    }
+
     _endScope();
     currentClass = enclosingClassType;
   }

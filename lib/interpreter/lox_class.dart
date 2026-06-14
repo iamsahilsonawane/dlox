@@ -40,8 +40,27 @@ class LoxClass implements LoxCallable {
   }
 }
 
+class LoxMetaclass extends LoxInstance implements LoxCallable {
+  final LoxClass targetKlass;
+
+  LoxMetaclass(LoxClass metaclass, this.targetKlass) : super(metaclass); //we're creating a LoxInstance for the metaclass, so actions on the metaclass happens
+
+  @override
+  int arity() => targetKlass.arity();
+
+  @override
+  Object? call(Interpreter interpreter, List<Object> arguments) {
+    return targetKlass.call(interpreter, arguments);
+  }
+
+  @override
+  String toString() {
+    return targetKlass.toString();
+  }
+}
+
 class LoxInstance {
-  final LoxClass klass;
+  final LoxClass? klass;
   final Map<String, Object> fields = {};
 
   LoxInstance(this.klass);
@@ -51,13 +70,9 @@ class LoxInstance {
       return fields[name.lexeme]!;
     }
 
-    final method = klass.getMethod(name.lexeme);
+    final method = klass?.getMethod(name.lexeme);
     if (method != null) {
       return method.bind(this);
-    }
-
-    if (method != null) {
-      return method;
     }
 
     throw RuntimeError(name, "Undefined property '${name.lexeme}'.");
@@ -69,6 +84,6 @@ class LoxInstance {
 
   @override
   String toString() {
-    return "${klass.name} instance";
+    return "${klass?.name ?? "baseMetaClass"} instance";
   }
 }

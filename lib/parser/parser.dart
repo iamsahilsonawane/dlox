@@ -47,13 +47,19 @@ class Parser {
     consume(TokenType.LEFT_BRACE, "Expect '{' before class body");
 
     final List<LFunction> methods = [];
+    final List<LFunction> staticMethods = [];
 
     while (!check(TokenType.RIGHT_BRACE) && !isAtEnd()) {
-      methods.add(function("method"));
+      if (check(TokenType.CLASS)) {
+        consume(TokenType.CLASS, "");
+        staticMethods.add(function("static function"));
+      } else {
+        methods.add(function("method"));
+      }
     }
 
     consume(TokenType.RIGHT_BRACE, "Expect '}' after a class body");
-    return Class(name: name, methods: methods);
+    return Class(name: name, methods: methods, staticMethods: staticMethods);
   }
 
   LFunction function(String kind) {

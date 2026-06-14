@@ -338,12 +338,22 @@ class Interpreter with pkg_expr.Visitor<Object?>, pkg_stmt.Visitor<void> {
   @override
   void visitClassStmt(pkg_stmt.Class stmt) {
     final Map<String, LoxFunction> methods = {};
+    final Map<String, LoxFunction> staticMethods = {};
+
     for (final method in stmt.methods) {
       methods[method.name.lexeme] = LoxFunction(method, _environment,
           isInitializer: method.name.lexeme == "init");
     }
+
+    for (final method in stmt.staticMethods) {
+      staticMethods[method.name.lexeme] = LoxFunction(method, _environment);
+    }
+
     LoxClass klass = LoxClass(stmt.name.lexeme, methods);
-    define(stmt.name, klass);
+    final metaclass = LoxMetaclass(
+        LoxClass("${stmt.name.lexeme} metaclass", staticMethods), klass);
+
+    define(stmt.name, metaclass);
   }
 
   @override

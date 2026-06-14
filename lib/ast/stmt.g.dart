@@ -34,6 +34,7 @@ class Class extends Stmt {
   Class({
     required this.name,
     required this.methods,
+    required this.staticMethods,
   });
 
   @override
@@ -43,6 +44,7 @@ class Class extends Stmt {
 
   final Token name;
   final List<LFunction> methods;
+  final List<LFunction> staticMethods;
 }
 
 class If extends Stmt {
