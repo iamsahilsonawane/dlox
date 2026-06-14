@@ -5,8 +5,13 @@ class Doughnut {
 }
 
 class BostonCream < Doughnut {
+  then(){
+    print "then";
+  }
+
   cook() {
     super.cook();
+    this.then();
     print "Pipe full of custard and coat with chocolate.";
   }
 }

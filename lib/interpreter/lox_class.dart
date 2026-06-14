@@ -10,10 +10,14 @@ class LoxClass extends LoxInstance implements LoxCallable {
   final Map<String, LoxFunction> methods;
   final LoxClass? superclass;
 
-  LoxClass(this.name, this.methods, this.superclass, LoxClass? metaclass) : super(metaclass);
+  LoxClass(this.name, this.methods, this.superclass, LoxClass? metaclass)
+      : super(metaclass);
 
   LoxFunction? getMethod(String name) {
-    return methods[name];
+    final result = methods[name];
+    if (result != null) return result;
+    if (superclass != null) return superclass!.getMethod(name);
+    return null;
   }
 
   @override
@@ -55,11 +59,6 @@ class LoxInstance {
     final method = klass?.getMethod(name.lexeme);
     if (method != null) {
       return method.bind(this);
-    }
-
-    final inheritedMethod = klass?.superclass?.getMethod(name.lexeme);
-    if (inheritedMethod != null) {
-      return inheritedMethod.bind(this);
     }
 
     throw RuntimeError(name, "Undefined property '${name.lexeme}'.");
