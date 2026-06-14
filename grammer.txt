@@ -3,7 +3,7 @@
 ### Syntax Grammer
 program          → declaration* EOF ;
 declaration      → classDecl | funDecl | varDecl | statement ;
-classDecl        → "class" (IDENTIFIER "{" function* "}") | function ;
+classDecl        → "class" (IDENTIFIER ("<" IDENTIFIER)? "{" function* "}") | function ;
 varDecl          → "var" IDENTIFIER ("=" expression ";")? ;
 funDecl          → "fun" function ;
 function         → (IDENTIFIER)? lamda
@@ -40,6 +40,7 @@ call             → primary ( "(" arguments? ")" | "." IDENTIFIER )* ;
 arguments        → expression ( "," expression )* ;
 primary          → NUMBER | STRING | "true" | "false" | "nil" | "(" expression ")"
                  | IDENTIFIER
+                 | "super" "." IDENTIFIER
                  //error productions
                  | ( "!=" | "==" ) equality
                  | ( ">" | ">=" | "<" | "<=" ) comparison

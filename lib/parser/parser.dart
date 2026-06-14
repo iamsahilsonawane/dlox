@@ -44,6 +44,15 @@ class Parser {
 
   Stmt classDeclaration() {
     Token name = consume(TokenType.IDENTIFIER, "Expect a class name");
+
+    Variable? superclass;
+
+    if (match([TokenType.LESS])) {
+      final name =
+          consume(TokenType.IDENTIFIER, "Expected name for the super class");
+      superclass = Variable(name: name);
+    }
+
     consume(TokenType.LEFT_BRACE, "Expect '{' before class body");
 
     final List<LFunction> methods = [];
@@ -59,7 +68,11 @@ class Parser {
     }
 
     consume(TokenType.RIGHT_BRACE, "Expect '}' after a class body");
-    return Class(name: name, methods: methods, staticMethods: staticMethods);
+    return Class(
+        name: name,
+        superclass: superclass,
+        methods: methods,
+        staticMethods: staticMethods);
   }
 
   LFunction function(String kind) {
@@ -427,6 +440,14 @@ class Parser {
 
     if (match([TokenType.IDENTIFIER])) {
       return Variable(name: previous());
+    }
+
+    if (match([TokenType.SUPER])) {
+      final keyword = previous();
+      consume(TokenType.DOT, "Expect '.' after 'super'");
+      final method =
+          consume(TokenType.IDENTIFIER, "Expect method name after 'super.'");
+      return Super(keyword: keyword, method: method);
     }
 
     // Error productions.

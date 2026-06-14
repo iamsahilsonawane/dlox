@@ -8,8 +8,9 @@ import '../scanner/token.dart';
 class LoxClass extends LoxInstance implements LoxCallable {
   final String name;
   final Map<String, LoxFunction> methods;
+  final LoxClass? superclass;
 
-  LoxClass(this.name, this.methods, LoxClass? metaclass) : super(metaclass);
+  LoxClass(this.name, this.methods, this.superclass, LoxClass? metaclass) : super(metaclass);
 
   LoxFunction? getMethod(String name) {
     return methods[name];
@@ -54,6 +55,11 @@ class LoxInstance {
     final method = klass?.getMethod(name.lexeme);
     if (method != null) {
       return method.bind(this);
+    }
+
+    final inheritedMethod = klass?.superclass?.getMethod(name.lexeme);
+    if (inheritedMethod != null) {
+      return inheritedMethod.bind(this);
     }
 
     throw RuntimeError(name, "Undefined property '${name.lexeme}'.");

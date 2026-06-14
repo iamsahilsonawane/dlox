@@ -7,7 +7,7 @@ import 'package:dlox/interpreter/interpreter.dart';
 
 enum FunctionType { none, function, method, initializer }
 
-enum ClassType { none, klass }
+enum ClassType { none, klass, subclass }
 
 class VariableUsage {
   final int slot;
@@ -254,6 +254,26 @@ class Resolver with pkg_expr.Visitor<Object?>, pkg_stmt.Visitor<void> {
     _declare(stmt.name);
     _define(stmt.name);
 
+    if (stmt.superclass != null &&
+        stmt.name.lexeme == stmt.superclass!.name.lexeme) {
+      DLox.errorAt(stmt.superclass!.name, "A class cannot inherit from itself");
+    }
+
+    if (stmt.superclass != null) {
+      currentClass = ClassType.subclass;
+      _resolveExpr(stmt.superclass!);
+    }
+
+    if (stmt.superclass != null) {
+      _beginScope();
+      scopes.peek['super'] = VariableUsage(
+        scopes.peek.length,
+        VariableUsageType.declared,
+        stmt.superclass!.name,
+        synthetic: true,
+      );
+    }
+
     _beginScope();
     scopes.peek["this"] = VariableUsage(
       scopes.peek.length,
@@ -275,6 +295,11 @@ class Resolver with pkg_expr.Visitor<Object?>, pkg_stmt.Visitor<void> {
     }
 
     _endScope();
+
+    if (stmt.superclass != null) {
+      _endScope();
+    }
+
     currentClass = enclosingClassType;
   }
 
@@ -299,6 +324,20 @@ class Resolver with pkg_expr.Visitor<Object?>, pkg_stmt.Visitor<void> {
           "'this' keyword can only be used inside a class method");
     }
     _resolveLocal(expr, expr.keyword, true);
+    return null;
+  }
+
+  @override
+  Object? visitSuperExpr(pkg_expr.Super expr) {
+    if (currentClass == ClassType.none) {
+      DLox.errorAt(expr.keyword,
+          "Can't use 'super' outside of a class.");
+    } else if (currentClass != ClassType.subclass) {
+      DLox.errorAt(expr.keyword,
+          "Can't use 'super' in a class with no superclass.");
+    }
+
+    _resolveLocal(expr, expr.keyword, false);
     return null;
   }
 }

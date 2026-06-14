@@ -33,6 +33,7 @@ class Block extends Stmt {
 class Class extends Stmt {
   Class({
     required this.name,
+    required this.superclass,
     required this.methods,
     required this.staticMethods,
   });
@@ -43,6 +44,7 @@ class Class extends Stmt {
   }
 
   final Token name;
+  final Variable? superclass;
   final List<LFunction> methods;
   final List<LFunction> staticMethods;
 }

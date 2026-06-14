@@ -337,6 +337,20 @@ class Interpreter with pkg_expr.Visitor<Object?>, pkg_stmt.Visitor<void> {
 
   @override
   void visitClassStmt(pkg_stmt.Class stmt) {
+    LoxClass? superclass;
+    if (stmt.superclass != null) {
+      final result = _evaluate(stmt.superclass!);
+      if (result is! LoxClass) {
+        throw RuntimeError(stmt.superclass!.name, "Superclass must be a class");
+      }
+      superclass = result;
+    }
+
+    if (stmt.superclass != null) {
+      _environment = Environment(_environment);
+      _environment!.define(superclass);
+    }
+
     final Map<String, LoxFunction> methods = {};
     final Map<String, LoxFunction> staticMethods = {};
 
@@ -350,8 +364,12 @@ class Interpreter with pkg_expr.Visitor<Object?>, pkg_stmt.Visitor<void> {
     }
 
     LoxClass metaclass =
-        LoxClass("${stmt.name.lexeme} metaclass", staticMethods, null);
-    LoxClass klass = LoxClass(stmt.name.lexeme, methods, metaclass);
+        LoxClass("${stmt.name.lexeme} metaclass", staticMethods, null, null);
+    LoxClass klass = LoxClass(stmt.name.lexeme, methods, superclass, metaclass);
+
+    if (superclass != null) {
+      _environment = _environment!.enclosing;
+    }
 
     define(stmt.name, klass);
   }
@@ -385,5 +403,19 @@ class Interpreter with pkg_expr.Visitor<Object?>, pkg_stmt.Visitor<void> {
   @override
   Object? visitThisExpr(pkg_expr.This expr) {
     return lookupVariable(expr.keyword, expr);
+  }
+
+  @override
+  Object? visitSuperExpr(pkg_expr.Super expr) {
+    final LoxClass superclass = lookupVariable(expr.keyword, expr) as LoxClass;
+    final int? distance = _locals[expr];
+    final LoxInstance object =
+        _environment!.getAt(distance! - 1, 0) as LoxInstance; //this is the first one in the slot always
+    final LoxFunction? method = superclass.getMethod(expr.method.lexeme);
+    if (method == null) {
+      throw RuntimeError(
+          expr.method, "Undefined property '${expr.method.lexeme}'.");
+    }
+    return method.bind(object);
   }
 }
