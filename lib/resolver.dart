@@ -151,9 +151,11 @@ class Resolver with pkg_expr.Visitor<Object?>, pkg_stmt.Visitor<void> {
     currentFunctionType = type;
 
     _beginScope();
-    for (Token param in lambda.params) {
-      _declare(param);
-      _define(param);
+    if (lambda.params != null) {
+      for (Token param in lambda.params!) {
+        _declare(param);
+        _define(param);
+      }
     }
 
     _resolveStatements(lambda.body);

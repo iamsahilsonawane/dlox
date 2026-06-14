@@ -19,7 +19,7 @@ void main(List<String> args) {
     "Unary           : Token operator, Expr right",
     "LSet            : Expr object, Token name, Expr value",
     "This            : Token keyword",
-    "Lambda          : List<Token> params, List<Stmt> body",
+    "Lambda          : List<Token>? params, List<Stmt> body",
     "Conditional     : Expr expr, Expr thenBranch, Expr elseBranch",
     "Variable        : Token name",
   ]);

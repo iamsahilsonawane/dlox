@@ -385,17 +385,21 @@ class Parser {
   }
 
   Lambda lambda() {
-    consume(TokenType.LEFT_PAREN, "Expect '(' after lambda");
-    final parameters = <Token>[];
-    if (!check(TokenType.RIGHT_PAREN)) {
-      do {
-        if (parameters.length >= 255) {
-          error(peek(), "Can't have more than 255 parameters.");
-        }
-        parameters.add(consume(TokenType.IDENTIFIER, "Expect parameter name."));
-      } while (match([TokenType.COMMA]));
+    List<Token>? parameters;
+    if (check(TokenType.LEFT_PAREN)) {
+      parameters = [];
+      consume(TokenType.LEFT_PAREN, "Expect '(' after lambda");
+      if (!check(TokenType.RIGHT_PAREN)) {
+        do {
+          if (parameters.length >= 255) {
+            error(peek(), "Can't have more than 255 parameters.");
+          }
+          parameters
+              .add(consume(TokenType.IDENTIFIER, "Expect parameter name."));
+        } while (match([TokenType.COMMA]));
+      }
+      consume(TokenType.RIGHT_PAREN, "Expect ')' after parameters.");
     }
-    consume(TokenType.RIGHT_PAREN, "Expect ')' after parameters.");
 
     consume(TokenType.LEFT_BRACE, "Expect '{' before lambda body.");
     return Lambda(body: block(), params: parameters);

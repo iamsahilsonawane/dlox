@@ -349,7 +349,8 @@ class Interpreter with pkg_expr.Visitor<Object?>, pkg_stmt.Visitor<void> {
       staticMethods[method.name.lexeme] = LoxFunction(method, _environment);
     }
 
-    LoxClass metaclass = LoxClass("${stmt.name.lexeme} metaclass", staticMethods, null);
+    LoxClass metaclass =
+        LoxClass("${stmt.name.lexeme} metaclass", staticMethods, null);
     LoxClass klass = LoxClass(stmt.name.lexeme, methods, metaclass);
 
     define(stmt.name, klass);
@@ -359,7 +360,11 @@ class Interpreter with pkg_expr.Visitor<Object?>, pkg_stmt.Visitor<void> {
   Object? visitGetExpr(pkg_expr.Get expr) {
     Object? object = _evaluate(expr.object);
     if (object is LoxInstance) {
-      return object.get(expr.name);
+      final result = object.get(expr.name);
+      if (result is LoxFunction && result.isGetter) {
+        return result.call(this, []);
+      }
+      return result;
     }
 
     throw RuntimeError(expr.name, "Only instances have properties");

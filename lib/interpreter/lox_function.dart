@@ -23,7 +23,8 @@ class LoxFunction extends LoxLamda {
   Object? call(Interpreter interpreter, List<Object> arguments) {
     final result = super.call(interpreter, arguments);
     if (isInitializer) {
-      return closure?.getAt(0, 0); //'this' is the first definition in the class environment, therefore 0
+      return closure?.getAt(0,
+          0); //'this' is the first definition in the class environment, therefore 0
     }
     return result;
   }
@@ -31,6 +32,10 @@ class LoxFunction extends LoxLamda {
   @override
   String toString() {
     return "<fn ${declaration.name.lexeme}>";
+  }
+
+  bool get isGetter {
+    return lambda.params == null;
   }
 }
 
@@ -42,15 +47,17 @@ class LoxLamda implements LoxCallable {
 
   @override
   int arity() {
-    return lambda.params.length;
+    return lambda.params?.length ?? 0;
   }
 
   @override
   Object? call(Interpreter interpreter, List<Object> arguments) {
     final environment = Environment(closure);
 
-    for (int i = 0; i < lambda.params.length; i++) {
-      environment.define(arguments[i]);
+    if (lambda.params != null) {
+      for (int i = 0; i < lambda.params!.length; i++) {
+        environment.define(arguments[i]);
+      }
     }
 
     try {

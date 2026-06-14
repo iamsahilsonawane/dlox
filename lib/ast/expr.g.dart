@@ -185,7 +185,7 @@ class Lambda extends Expr {
     return visitor.visitLambdaExpr(this);
   }
 
-  final List<Token> params;
+  final List<Token>? params;
   final List<Stmt> body;
 }
 

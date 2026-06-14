@@ -18,6 +18,7 @@ forStmt          → "for" "(" (varDecl | exprStmt | ";")
                   expression? ";"
                   expression? ")" statement ;
 whileStmt        → "while" "(" expression ")" statement ;
+getters          → IDENTIFIER block ;
 block            → "{" declaration* "}" ;
 exprStmt         → expression ";" ;
 printStmt        → "print" expression ";" ;
