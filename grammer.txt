@@ -20,6 +20,7 @@ forStmt          → "for" "(" (varDecl | exprStmt | ";")
                   expression? ")" statement ;
 whileStmt        → "while" "(" expression ")" statement ;
 getters          → IDENTIFIER block ;
+listAccess       → IDENTIFIER [ NUMBER ] ;
 block            → "{" declaration* "}" ;
 exprStmt         → expression ";" ;
 printStmt        → "print" expression ";" ;

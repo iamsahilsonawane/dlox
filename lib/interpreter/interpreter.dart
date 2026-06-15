@@ -384,6 +384,13 @@ class Interpreter with pkg_expr.Visitor<Object?>, pkg_stmt.Visitor<void> {
         return result.call(this, []);
       }
       return result;
+    } else if (object is LoxList) {
+      final callable = object.getCallable(expr.name.lexeme);
+      if (callable == null) {
+        throw RuntimeError(
+            expr.name, "There's no method '${expr.name.lexeme}' on list");
+      }
+      return callable;
     }
 
     throw RuntimeError(expr.name, "Only instances have properties");
@@ -456,5 +463,163 @@ class Interpreter with pkg_expr.Visitor<Object?>, pkg_stmt.Visitor<void> {
     }
 
     return methods;
+  }
+
+  @override
+  Object? visitJListExpr(pkg_expr.JList expr) {
+    return LoxList(
+      startToken: expr.startBracket,
+      list: expr.list.map((e) => _evaluate(e)).toList(),
+    );
+  }
+
+  @override
+  Object? visitListAccessExpr(pkg_expr.ListAccess expr) {
+    final list = _evaluate(expr.list);
+    if (list is! LoxList) {
+      throw RuntimeError(expr.bracket,
+          "Cannot call list access operator on a non-list object");
+    }
+    try {
+      final index = _evaluate(expr.index);
+      if (index is! num) {
+        throw RuntimeError(expr.bracket, "Non-null value passed to index");
+      }
+      return list.list[index.toInt()];
+    } on RangeError catch (_) {
+      throw RuntimeError(expr.bracket,
+          "Array index out of range. Tried to access ${expr.index} for a list of length ${list.list.length}");
+    }
+  }
+
+  @override
+  Object? visitListSetExpr(pkg_expr.ListSet expr) {
+    final list = _evaluate(expr.list);
+    if (list is! LoxList) {
+      throw RuntimeError(expr.bracket,
+          "Cannot call list access operator on a non-list object");
+    }
+    try {
+      final index = _evaluate(expr.index);
+      if (index is! num) {
+        throw RuntimeError(expr.bracket, "Non-null value passed to index");
+      }
+      return list.list[index.toInt()] = _evaluate(expr.value);
+    } on RangeError catch (_) {
+      throw RuntimeError(expr.bracket,
+          "Array index out of range. Tried to access ${expr.index} for a list of length ${list.list.length}");
+    }
+  }
+}
+
+class LoxList {
+  final List<dynamic> list;
+  final Token startToken;
+
+  LoxList({required this.startToken, required this.list}) {
+    registerMethods();
+  }
+
+  Map<String, LoxCallable> methods = {};
+
+  void registerMethods() {
+    methods["set"] = _LoxListSet(this);
+    methods["len"] = _LoxListLen(this);
+    methods["push"] = _LoxListPush(this);
+    methods["pop"] = _LoxListPop(this);
+  }
+
+  LoxCallable? getCallable(String name) {
+    return methods[name];
+  }
+
+  @override
+  String toString() {
+    return "[${list.map((e) => e.toString()).join(", ")}]";
+  }
+}
+
+class _LoxListSet extends LoxCallable {
+  final LoxList loxList;
+
+  _LoxListSet(this.loxList);
+
+  @override
+  int arity() {
+    return 2;
+  }
+
+  @override
+  Object? call(Interpreter interpreter, List<Object> arguments) {
+    final startToken = loxList.startToken;
+    final list = loxList.list;
+
+    if (arguments[0] is! double) {
+      //dlox only has double values for num
+      //TODO(sahil): is this the right place to do this? can't we do this in resolver?
+      throw RuntimeError(
+          startToken, "Expected integer for index (as first parameter)");
+    }
+
+    final index = (arguments[0] as double).toInt();
+    final value = arguments[1];
+
+    try {
+      list[index] = value;
+    } on RangeError catch (_) {
+      throw RuntimeError(startToken,
+          "Array index out of range. Tried to access ${arguments[0]} for a list of length ${list.length}");
+    }
+    return null;
+  }
+}
+
+class _LoxListLen extends LoxCallable {
+  final LoxList loxList;
+
+  _LoxListLen(this.loxList);
+
+  @override
+  int arity() {
+    return 0;
+  }
+
+  @override
+  Object? call(Interpreter interpreter, List<Object> arguments) {
+    return loxList.list.length;
+  }
+}
+
+class _LoxListPush extends LoxCallable {
+  final LoxList loxList;
+
+  _LoxListPush(this.loxList);
+
+  @override
+  int arity() {
+    return 1;
+  }
+
+  @override
+  Object? call(Interpreter interpreter, List<Object> arguments) {
+    loxList.list.add(arguments[0]);
+    return null;
+  }
+}
+
+
+class _LoxListPop extends LoxCallable {
+  final LoxList loxList;
+
+  _LoxListPop(this.loxList);
+
+  @override
+  int arity() {
+    return 0;
+  }
+
+  @override
+  Object? call(Interpreter interpreter, List<Object> arguments) {
+    return loxList.list.removeLast();
   }
 }

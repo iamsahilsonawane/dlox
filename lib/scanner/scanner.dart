@@ -37,6 +37,12 @@ class Scanner {
       case '}':
         addTokenNoLiteral(TokenType.RIGHT_BRACE);
         break;
+      case '[':
+        addTokenNoLiteral(TokenType.LEFT_SQUARE_BRACKET);
+        break;
+      case ']':
+        addTokenNoLiteral(TokenType.RIGHT_SQUARE_BRACKET);
+        break;
       case ',':
         addTokenNoLiteral(TokenType.COMMA);
         break;

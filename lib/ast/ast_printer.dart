@@ -98,4 +98,28 @@ class AstPrinter with Visitor<String> {
     // TODO: implement visitThisExpr
     throw UnimplementedError();
   }
+
+  @override
+  String visitJListExpr(JList expr) {
+    // TODO: implement visitJListExpr
+    throw UnimplementedError();
+  }
+
+  @override
+  String visitListAccessExpr(ListAccess expr) {
+    // TODO: implement visitListAccessExpr
+    throw UnimplementedError();
+  }
+
+  @override
+  String visitListSetExpr(ListSet expr) {
+    // TODO: implement visitListSetExpr
+    throw UnimplementedError();
+  }
+
+  @override
+  String visitSuperExpr(Super expr) {
+    // TODO: implement visitSuperExpr
+    throw UnimplementedError();
+  }
 }

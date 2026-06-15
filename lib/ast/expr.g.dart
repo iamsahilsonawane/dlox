@@ -21,6 +21,9 @@ mixin Visitor<R> {
   R visitLambdaExpr(Lambda expr);
   R visitConditionalExpr(Conditional expr);
   R visitVariableExpr(Variable expr);
+  R visitJListExpr(JList expr);
+  R visitListAccessExpr(ListAccess expr);
+  R visitListSetExpr(ListSet expr);
 }
 
 class Assign extends Expr {
@@ -233,5 +236,56 @@ class Variable extends Expr {
   }
 
   final Token name;
+}
+
+class JList extends Expr {
+  JList({
+    required this.startBracket,
+    required this.list,
+  });
+
+  @override
+  R accept<R>(Visitor<R> visitor) {
+    return visitor.visitJListExpr(this);
+  }
+
+  final Token startBracket;
+  final List<Expr> list;
+}
+
+class ListAccess extends Expr {
+  ListAccess({
+    required this.list,
+    required this.index,
+    required this.bracket,
+  });
+
+  @override
+  R accept<R>(Visitor<R> visitor) {
+    return visitor.visitListAccessExpr(this);
+  }
+
+  final Expr list;
+  final Expr index;
+  final Token bracket;
+}
+
+class ListSet extends Expr {
+  ListSet({
+    required this.list,
+    required this.index,
+    required this.value,
+    required this.bracket,
+  });
+
+  @override
+  R accept<R>(Visitor<R> visitor) {
+    return visitor.visitListSetExpr(this);
+  }
+
+  final Expr list;
+  final Expr index;
+  final Expr value;
+  final Token bracket;
 }
 

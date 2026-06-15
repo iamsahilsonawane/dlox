@@ -1,4 +1,5 @@
-import 'package:dlox/ast/expr.g.dart';
+import 'dart:ffi';
+
 import 'package:dlox/dlox.dart';
 import 'package:dlox/parser/parse_error.dart';
 import 'package:dlox/scanner/token_type.dart';
@@ -273,7 +274,7 @@ class Parser {
   }
 
   Expr assignment() {
-    Expr expr = conditional();
+    Expr expr = jlist();
 
     if (match([TokenType.EQUAL])) {
       final equals = previous();
@@ -284,10 +285,23 @@ class Parser {
         return Assign(name: name, value: value);
       } else if (expr is Get) {
         return LSet(name: expr.name, value: value, object: expr.object);
+      } else if (expr is ListAccess) {
+        return ListSet(
+          list: expr.list,
+          index: expr.index,
+          value: value,
+          bracket: expr.bracket,
+        );
       }
 
       error(equals, "Invalid assignment target");
     }
+    return expr;
+  }
+
+  Expr jlist() {
+    final expr = conditional();
+
     return expr;
   }
 
@@ -395,7 +409,7 @@ class Parser {
   }
 
   Expr call() {
-    Expr expr = primary();
+    Expr expr = listAccess();
     while (true) {
       if (match([TokenType.LEFT_PAREN])) {
         expr = finishCall(expr);
@@ -407,6 +421,21 @@ class Parser {
         break;
       }
     }
+    return expr;
+  }
+
+  Expr listAccess() {
+    var expr = primary();
+
+    while (match([TokenType.LEFT_SQUARE_BRACKET])) {
+      final bracket = previous();
+      final index = primary();
+      consume(
+          TokenType.RIGHT_SQUARE_BRACKET, "Expect ']' after list access index");
+      expr = ListAccess(
+          list: expr, index: index, bracket: bracket);
+    }
+
     return expr;
   }
 
@@ -475,6 +504,18 @@ class Parser {
 
     if (match([TokenType.IDENTIFIER])) {
       return Variable(name: previous());
+    }
+
+    if (check(TokenType.LEFT_SQUARE_BRACKET)) {
+      final start = consume(TokenType.LEFT_SQUARE_BRACKET, "");
+      final List<Expr> list = [];
+      if (!check(TokenType.RIGHT_SQUARE_BRACKET)) {
+        do {
+          list.add(expression());
+        } while (match([TokenType.COMMA]));
+      }
+      consume(TokenType.RIGHT_SQUARE_BRACKET, "] expected");
+      return JList(list: list, startBracket: start);
     }
 
     if (match([TokenType.SUPER])) {

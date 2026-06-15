@@ -377,4 +377,23 @@ class Resolver with pkg_expr.Visitor<Object?>, pkg_stmt.Visitor<void> {
 
     currentClass = enclosingClassType;
   }
+
+  @override
+  Object? visitJListExpr(pkg_expr.JList expr) {
+    return null;
+  }
+
+  @override
+  Object? visitListAccessExpr(pkg_expr.ListAccess expr) {
+    _resolveExpr(expr.list);
+    _resolveExpr(expr.index);
+    return null;
+  }
+
+  @override
+  Object? visitListSetExpr(pkg_expr.ListSet expr) {
+    _resolveExpr(expr.list);
+    _resolveExpr(expr.index);
+    return null;
+  }
 }

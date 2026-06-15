@@ -23,6 +23,9 @@ void main(List<String> args) {
     "Lambda          : List<Token>? params, List<Stmt> body",
     "Conditional     : Expr expr, Expr thenBranch, Expr elseBranch",
     "Variable        : Token name",
+    "JList           : Token startBracket, List<Expr> list",
+    "ListAccess      : Expr list, Expr index, Token bracket",
+    "ListSet         : Expr list, Expr index, Expr value, Token bracket",
   ]);
 
   defineAst(outputDir, "Stmt", [

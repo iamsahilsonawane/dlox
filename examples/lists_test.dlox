@@ -1,0 +1,8 @@
+
+var numbers = [10, 20, 30, 40, 50, [1, 2]];
+
+//print numbers;
+
+
+numbers[1] = 99;
+print numbers[1];  // 99
